@@ -23,7 +23,21 @@ import urllib2
 
 # db.close()
 
-def getItemNumber(i):
+def getLeader3V3(ranking):
+    try:
+        fichier=urllib2.urlopen("http://eu.battle.net/api/wow/leaderboard/3v3")
+        data=json.load(fichier)
+        try:
+            print "Rank = "+str(ranking)
+            print "Name = "+str(data["rows"][ranking]["name"])
+            print "Servername ="+str(data["rows"][ranking]["realmName"])
+        except :
+            print "Erreur json parsing"
+    except :
+        print "Impossible de retrouver la liste"
+
+
+def getItem(i):
 
     try:
         fichier=urllib2.urlopen("http://us.battle.net/api/wow/item/"+str(i))
@@ -39,5 +53,3 @@ def getItemNumber(i):
 
 
 
-for i in range(10000,10100):
-    getItemNumber(i)
