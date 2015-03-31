@@ -23,30 +23,22 @@ import urllib2
 
 # db.close()
 
-def getLeader3V3(ranking):
+def getDataFromUrl(url):
     try:
-        fichier=urllib2.urlopen("http://eu.battle.net/api/wow/leaderboard/3v3")
-        data=json.load(fichier)
-        try:
-            print "Rank = "+str(ranking)
-            print "Name = "+str(data["rows"][ranking]["name"])
-            print "Servername ="+str(data["rows"][ranking]["realmName"])
-        except :
-            print "Erreur json parsing"
+        jsonFile=urllib2.urlopen(url)
+        data=json.load(jsonFile)
+        return data
     except :
-        print "Impossible de retrouver la liste"
+        return None
+
+def getLeader3V3(ranking):
+    assert(ranking>=1)
+    return getDataFromUrl("http://eu.battle.net/api/wow/leaderboard/3v3")["rows"][ranking-1]
+    
 
 
 def getItem(i):
-
-    try:
-        fichier=urllib2.urlopen("http://us.battle.net/api/wow/item/"+str(i))
-        data=json.load(fichier)
-        print "ID ="+str(data["id"])
-        print "Buyprice ="+str(data["buyPrice"])
-        print "\n"
-    except :
-        print "404 id ="+str(i)+"\n"
+    return getDataFromUrl("http://us.battle.net/api/wow/item/"+str(i))
         
 
 
