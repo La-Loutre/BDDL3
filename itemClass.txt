@@ -1,0 +1,17 @@
+0,Consumable
+1,Container
+2,Weapon
+3,Gem
+4,Armor
+5,Reagent
+6,Projectile
+7,Trade Goods
+8,Generic
+9,Book
+10,Money
+11,Quiver
+12,Quest
+13,Key
+14,Permanent
+15,Junk
+16,Glyph

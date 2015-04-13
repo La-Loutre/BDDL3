@@ -24,6 +24,47 @@ import traceback
 
 # db.close()
 
+def createTables():
+    db=MySQLdb.connect(host="localhost",user="louis",passwd=p,db="wowdb")
+    cur = db.cursor()
+    zap=False
+    try:
+        cur.execute("CREATE TABLE ITEMCLASS (`id` TINYINT UNSIGNED NOT NULL,`name` varchar(30))")
+    except:
+        zap=True
+    if not zap :
+        fichierItemClass=open("itemClass.txt","r")
+        line=fichierItemClass.readline()
+        while line != "":
+            splitedLine=line.split(",",1)
+            line=fichierItemClass.readline()
+            print splitedLine[0],splitedLine[1]
+            cur.execute("INSERT INTO ITEMCLASS VALUES("+splitedLine[0]+",'"+splitedLine[1].split("\n")[0]+"')")
+
+        fichierItemClass.close()
+
+    fichierItemSubClass=open("itemSubClass.txt","r")
+    try:
+        cur.execute("CREATE TABLE ITEMSUBCLASS (`idClass` TINYINT UNSIGNED NOT NULL,`idSubClass` TINYINT UNSIGNED NOT NULL, `name` varchar(30) ,`completeName` varchar(30)) ")
+    except:
+        print traceback.format_exc()
+       
+    line=fichierItemSubClass.readline()
+    while line != "":
+        splitedLine = line.split(",")
+        cur.execute("INSERT INTO ITEMSUBCLASS VALUES("+splitedLine[0]+","+splitedLine[1]+",'"+splitedLine[2]+"','"+splitedLine[3].split("\n")[0]+"')")
+        line=fichierItemSubClass.readline()
+
+    fichierItemSubClass.close()
+    cur.execute("SELECT * FROM ITEMSUBCLASS")
+    row=cur.fetchall()
+    
+    print row
+    db.commit()
+    db.close()
+    
+    
+
 WOW_API_URL="http://eu.battle.net/api/wow/"
 LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR"}
 DEBUG=True
@@ -42,7 +83,7 @@ def getDataFromUrl(url,local="fr"):
         return None
 
 
-def getPlayerProfile(serverName,playerName,field=None):
+def getPlayerProfile(serverName,playerName,field=""):
     return getDataFromUrl(WOW_API_URL+"character/"+serverName+"/"+playerName+field)
 def getLeader3V3(ranking,moreInfo=True):
     assert(ranking>=1)
