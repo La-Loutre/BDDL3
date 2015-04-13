@@ -23,29 +23,35 @@ import traceback
 
 
 # db.close()
-
+db=MySQLdb.connect(host="localhost",user="louis",passwd=p,db="wowdb")
 def createTables():
-    db=MySQLdb.connect(host="localhost",user="louis",passwd=p,db="wowdb")
+    global db
     cur = db.cursor()
-    zap=False
+    
     try:
-        cur.execute("CREATE TABLE ITEMCLASS (`id` TINYINT UNSIGNED NOT NULL,`name` varchar(30))")
+        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(50),`description` bool,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id)) ")
     except:
-        zap=True
-    if not zap :
-        fichierItemClass=open("itemClass.txt","r")
-        line=fichierItemClass.readline()
-        while line != "":
-            splitedLine=line.split(",",1)
-            line=fichierItemClass.readline()
-            print splitedLine[0],splitedLine[1]
-            cur.execute("INSERT INTO ITEMCLASS VALUES("+splitedLine[0]+",'"+splitedLine[1].split("\n")[0]+"')")
+        print traceback.format_exc()
+    
+    try:
+        cur.execute("CREATE TABLE ITEMCLASS (`id` TINYINT UNSIGNED NOT NULL,`name` varchar(30),PRIMARY KEY(id))")
+    except:
+        print traceback.format_exc()
+        return None
 
-        fichierItemClass.close()
+    fichierItemClass=open("itemClass.txt","r")
+    line=fichierItemClass.readline()
+    while line != "":
+        splitedLine=line.split(",",1)
+        line=fichierItemClass.readline()
+        print splitedLine[0],splitedLine[1]
+        cur.execute("INSERT INTO ITEMCLASS VALUES("+splitedLine[0]+",'"+splitedLine[1].split("\n")[0]+"')")
+
+    fichierItemClass.close()
 
     fichierItemSubClass=open("itemSubClass.txt","r")
     try:
-        cur.execute("CREATE TABLE ITEMSUBCLASS (`idClass` TINYINT UNSIGNED NOT NULL,`idSubClass` TINYINT UNSIGNED NOT NULL, `name` varchar(30) ,`completeName` varchar(30)) ")
+        cur.execute("CREATE TABLE ITEMSUBCLASS (`idClass` TINYINT UNSIGNED NOT NULL,`idSubClass` TINYINT UNSIGNED NOT NULL, `name` varchar(30) ,`completeName` varchar(30),PRIMARY KEY(idClass,idSubClass)) ")
     except:
         print traceback.format_exc()
        
@@ -92,7 +98,16 @@ def getLeader3V3(ranking,moreInfo=True):
     if moreInfo:
         return info,info["name"],info["realmName"]
     
-
+def addItemToDB(curseurDb,item):
+    description="true"
+    if item["description"] == "":
+        description="false"
+        
+    try:
+        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",'"+item["name"].encode("utf-8")+"',"+description+","+str(item["itemLevel"])+")")
+    except:
+        print traceback.format_exc()
+    
 
 def getItem(i):
     return getDataFromUrl(WOW_API_URL+"item/"+str(i))
