@@ -2,6 +2,7 @@ import json
 import MySQLdb
 from passwd import *
 import urllib2
+import traceback
 
 # db=MySQLdb.connect(host="dbserver",
 #                    user="ldouriez",
@@ -23,22 +24,29 @@ import urllib2
 
 # db.close()
 
-def getDataFromUrl(url):
+LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR"}
+DEBUG=True
+def getDataFromUrl(url,local="fr"):
+    global LOCALS
+    global DEBUG
     try:
-        jsonFile=urllib2.urlopen(url)
+        if DEBUG:
+            print url+LOCALS[local]
+        jsonFile=urllib2.urlopen(url+LOCALS[local])
         data=json.load(jsonFile)
         return data
     except :
+        print traceback.format_exc()
         return None
 
 def getLeader3V3(ranking):
     assert(ranking>=1)
-    return getDataFromUrl("http://eu.battle.net/api/wow/leaderboard/3v3")["rows"][ranking-1]
+    return getDataFromUrl("http://eu.battle.net/api/wow/leaderboard/3v3?locale=fr_FR")["rows"][ranking-1]
     
 
 
 def getItem(i):
-    return getDataFromUrl("http://us.battle.net/api/wow/item/"+str(i))
+    return getDataFromUrl("http://eu.battle.net/api/wow/item/"+str(i))
         
 
 
