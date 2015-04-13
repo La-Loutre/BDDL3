@@ -24,6 +24,7 @@ import traceback
 
 # db.close()
 
+WOW_API_URL="http://eu.battle.net/api/wow/"
 LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR"}
 DEBUG=True
 def getDataFromUrl(url,local="fr"):
@@ -36,17 +37,24 @@ def getDataFromUrl(url,local="fr"):
         data=json.load(jsonFile)
         return data
     except :
-        print traceback.format_exc()
+        if DEBUG:
+            print traceback.format_exc()
         return None
 
-def getLeader3V3(ranking):
+
+def getPlayerProfile(serverName,playerName,field=None):
+    return getDataFromUrl(WOW_API_URL+"character/"+serverName+"/"+playerName+field)
+def getLeader3V3(ranking,moreInfo=True):
     assert(ranking>=1)
-    return getDataFromUrl("http://eu.battle.net/api/wow/leaderboard/3v3?locale=fr_FR")["rows"][ranking-1]
+    # No trycatch 
+    info = getDataFromUrl(WOW_API_URL+"leaderboard/3v3")["rows"][ranking-1]
+    if moreInfo:
+        return info,info["name"],info["realmName"]
     
 
 
 def getItem(i):
-    return getDataFromUrl("http://eu.battle.net/api/wow/item/"+str(i))
+    return getDataFromUrl(WOW_API_URL+"item/"+str(i))
         
 
 
