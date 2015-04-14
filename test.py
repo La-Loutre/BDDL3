@@ -1,5 +1,5 @@
 import json
-import MySQLdb
+import MySQLdb,MySQLdb.cursors
 from passwd import *
 import urllib2
 import traceback
@@ -94,6 +94,8 @@ def createTables():
     
 
 WOW_API_URL="http://eu.battle.net/api/wow/"
+WOW_MEDIUM_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/56/"
+WOW_SMALL_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/36/"
 LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR"}
 DEBUG=True
 def getDataFromUrl(url,local="fr"):
@@ -208,3 +210,21 @@ def testAddItem(start,end):
         db.commit()
     
 
+
+def generateWebSite():
+    cursorDb=MySQLdb.cursors.DictCursor(db)
+    cursorDb2=MySQLdb.cursors.DictCursor(db)
+    fichierHtml=open("sortie.html","w")
+    try:
+        cursorDb.execute("SELECT * FROM ITEMS")
+        for row in cursorDb:
+           
+            cursorDb2.execute("SELECT name FROM ITEMSPICTURES WHERE id="+str(row["picture"]))
+            row2=cursorDb2.fetchone()
+           
+            imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
+            fichierHtml.write("<p>{nom}".format(nom=row["name"])+" <img src="+imgLink+"><p>")
+    except:
+        print traceback.format_exc()
+
+generateWebSite()
