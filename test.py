@@ -209,11 +209,26 @@ def testAddItem(start,end):
             addItemToDB(cursorDb,item)
         db.commit()
     
-
+def getTypes(typeid,subtypeid):
+    cursor=MySQLdb.cursors.DictCursor(db)
+    cursor.execute("SELECT name FROM ITEMCLASS WHERE id={id}".format(id=typeid))
+    typeValue=cursor.fetchone()
+    cursor.execute("SELECT name FROM ITEMSUBCLASS WHERE idClass={idClass} AND idSubClass={idSubClass}".format(idClass=typeid,idSubClass=subtypeid))
+    subTypeValue=cursor.fetchone()
+    cursor.close()
+    return typeValue["name"], subTypeValue["name"]
 def generateItemPage(row,imgName,fileName):
     newHtml=open(fileName+".html","w")
-    newHtml.write("<p>Nom: {nom} </p><p>Niveau: {niveau}</p><p>Description : {description}</p> <img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description="freg",imgnom=imgName))
+
+    cursor=MySQLdb.cursors.DictCursor(db)
+    cursor.execute("SELECT description FROM ITEMSDESCRIPTIONS WHERE id={idDesc}".format(idDesc=str(row["description"])))
+    descriptionValue=cursor.fetchone()["description"]
+    print str(row["classid"]) , str(row["subclassid"])
+    typeValue,subTypeValue=getTypes(str(row["classid"]),str(row["subclassid"]))
+
+    newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
     newHtml.close()
+    cursor.close()
 def generateWebSite():
     cursorDb=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
@@ -233,4 +248,4 @@ def generateWebSite():
     except:
         print traceback.format_exc()
     fichierHtml.close()
-##generateWebSite()
+generateWebSite()
