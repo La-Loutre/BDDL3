@@ -134,10 +134,11 @@ def addItemToDB(database,item):
                 print row
                 maxIdItemsPicture=int(row[0])+1
             keyPicture=maxIdItemsPicture
+            curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES("+str(keyPicture)+",'"+item["icon"].encode("utf-8")+"')")
     except:
         print traceback.format_exc()
         return None
-    curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES("+str(keyPicture)+",'"+item["icon"].encode("utf-8")+"')")
+    
 
     
     description="true"
@@ -156,5 +157,10 @@ def getItem(i):
 
 
 
-
+def testAddItem(start,end):
+    for i in range(start,end):
+        item=getItem(i)
+        if item != None:
+            addItemToDB(db,item)
+    db.commit()
 
