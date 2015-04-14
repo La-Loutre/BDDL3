@@ -213,10 +213,13 @@ def getTypes(typeid,subtypeid):
     cursor=MySQLdb.cursors.DictCursor(db)
     cursor.execute("SELECT name FROM ITEMCLASS WHERE id={id}".format(id=typeid))
     typeValue=cursor.fetchone()
-    cursor.execute("SELECT name FROM ITEMSUBCLASS WHERE idClass={idClass} AND idSubClass={idSubClass}".format(idClass=typeid,idSubClass=subtypeid))
+    cursor.execute("SELECT * FROM ITEMSUBCLASS WHERE idClass={idClass} AND idSubClass={idSubClass}".format(idClass=typeid,idSubClass=subtypeid))
     subTypeValue=cursor.fetchone()
     cursor.close()
-    return typeValue["name"], subTypeValue["name"]
+    if subTypeValue["completeName"]!="NULL":
+        return typeValue["name"], subTypeValue["completeName"]
+    else:
+        return typeValue["name"], subTypeValue["name"]
 def generateItemPage(row,imgName,fileName):
     newHtml=open(fileName+".html","w")
 
@@ -248,4 +251,4 @@ def generateWebSite():
     except:
         print traceback.format_exc()
     fichierHtml.close()
-generateWebSite()
+##generateWebSite()
