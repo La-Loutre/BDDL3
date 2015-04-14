@@ -31,7 +31,7 @@ def createTables():
 
     ## Create items table (empty)
     try:
-        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(50),`description` bool,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id),`picture` MEDIUMINT UNSIGNED ) ")
+        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(100),`description` bool,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id),`picture` MEDIUMINT UNSIGNED ) ")
     except:
         print traceback.format_exc()
     
@@ -71,16 +71,17 @@ def createTables():
     
     ## Create ITEMSPICTURES table (empty)
     try:
-        cur.execute("CREATE TABLE ITEMSDESCRIPTIONS (`id` MEDIUMINT UNSIGNED NOT NULL,`description` varchar(100) , PRIMARY KEY(id,description))")
+        cur.execute("CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,`name` varchar(30) , PRIMARY KEY(id,name))")
     except:
         print traceback.format_exc()
 
     ## Create ITEMSDESCRIPTION table (empty)
     try:
-        cur.execute("CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,`name` varchar(30) , PRIMARY KEY(id,name))")
+        cur.execute("CREATE TABLE ITEMSDESCRIPTIONS (`id` MEDIUMINT UNSIGNED NOT NULL,`description` varchar(100) , PRIMARY KEY(id,description))")
     except:
         print traceback.format_exc()
 
+        
     ## Show results
     cur.execute("SELECT * FROM ITEMSUBCLASS")
     row=cur.fetchall()    
@@ -119,6 +120,33 @@ def getLeader3V3(ranking,moreInfo=True):
     if moreInfo:
         return info,info["name"],info["realmName"]
 
+def addItemDescription(curseurDb,item):
+    try:
+        print "SELECT id FROM ITEMSDESCRIPTIONS WHERE description=\""+item["description"].encode("utf-8")+"\""
+        curseurDb.execute("SELECT id FROM ITEMSDESCRIPTIONS WHERE description=\""+item["description"].encode("utf-8")+"\"")
+    
+        row =curseurDb.fetchone() 
+        print row
+        if row != None:
+            keyDescription=row[0]
+            print keyDescription
+        else:
+            curseurDb.execute("SELECT MAX(id) FROM ITEMSDESCRIPTIONS ")
+            row =curseurDb.fetchone()
+            if row[0] == None:
+                maxIdItemsPicture=0
+            else:
+                print row
+                maxIdItemsPicture=int(row[0])+1
+            keyDescription=maxIdItemsPicture
+            curseurDb.execute("INSERT INTO ITEMSDESCRIPTIONS VALUES("+str(keyDescription)+",\""+item["description"].encode("utf-8")+"\")")
+    except:
+        print traceback.format_exc()
+        return None
+    return keyDescription
+    
+
+
 
 def addItemPicture(curseurDb,item):
     try:
@@ -150,12 +178,14 @@ def addItemToDB(curseurDb,item):
     keyPicture=addItemPicture(curseurDb,item)
     if keyPicture == None:
         return None
-    description="true"
-    if item["description"] == "":
-        description="false"
-    try:
-        
-        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+description+","+str(item["itemLevel"])+","+str(keyPicture)+")")
+
+    
+    keyDescription=addItemDescription(curseurDb,item)
+    if keyDescription == None:
+        return None
+
+    try:        
+        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+")")
 
     except:
         print "INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+description+","+str(item["itemLevel"])+","+str(keyPicture)+")"
