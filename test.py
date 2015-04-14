@@ -71,11 +71,16 @@ def createTables():
     
     ## Create ITEMSPICTURES table (empty)
     try:
+        cur.execute("CREATE TABLE ITEMSDESCRIPTIONS (`id` MEDIUMINT UNSIGNED NOT NULL,`description` varchar(100) , PRIMARY KEY(id,description))")
+    except:
+        print traceback.format_exc()
+
+    ## Create ITEMSDESCRIPTION table (empty)
+    try:
         cur.execute("CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,`name` varchar(30) , PRIMARY KEY(id,name))")
     except:
         print traceback.format_exc()
 
-    
     ## Show results
     cur.execute("SELECT * FROM ITEMSUBCLASS")
     row=cur.fetchall()    
@@ -113,12 +118,12 @@ def getLeader3V3(ranking,moreInfo=True):
     info = getDataFromUrl(WOW_API_URL+"leaderboard/3v3")["rows"][ranking-1]
     if moreInfo:
         return info,info["name"],info["realmName"]
-    
-def addItemToDB(database,item):
-    curseurDb=database.cursor()
+
+
+def addItemPicture(curseurDb,item):
     try:
-        print "SELECT id FROM ITEMSPICTURES WHERE name='"+item["icon"].encode("utf-8")+"'"
-        curseurDb.execute("SELECT id FROM ITEMSPICTURES WHERE name='"+item["icon"].encode("utf-8")+"'")
+        print "SELECT id FROM ITEMSPICTURES WHERE name=\""+item["icon"].encode("utf-8")+"\""
+        curseurDb.execute("SELECT id FROM ITEMSPICTURES WHERE name=\""+item["icon"].encode("utf-8")+"\"")
     
         row =curseurDb.fetchone() 
         print row
@@ -134,19 +139,26 @@ def addItemToDB(database,item):
                 print row
                 maxIdItemsPicture=int(row[0])+1
             keyPicture=maxIdItemsPicture
-            curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES("+str(keyPicture)+",'"+item["icon"].encode("utf-8")+"')")
+            curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES("+str(keyPicture)+",\""+item["icon"].encode("utf-8")+"\")")
     except:
         print traceback.format_exc()
         return None
+    return keyPicture
     
+def addItemToDB(curseurDb,item):
 
-    
+    keyPicture=addItemPicture(curseurDb,item)
+    if keyPicture == None:
+        return None
     description="true"
     if item["description"] == "":
         description="false"
     try:
-        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",'"+item["name"].encode("utf-8")+"',"+description+","+str(item["itemLevel"])+","+str(keyPicture)+")")
+        
+        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+description+","+str(item["itemLevel"])+","+str(keyPicture)+")")
+
     except:
+        print "INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+description+","+str(item["itemLevel"])+","+str(keyPicture)+")"
         print traceback.format_exc()
     
 
@@ -158,9 +170,11 @@ def getItem(i):
 
 
 def testAddItem(start,end):
+    cursorDb=db.cursor()
     for i in range(start,end):
         item=getItem(i)
         if item != None:
-            addItemToDB(db,item)
-    db.commit()
+            addItemToDB(cursorDb,item)
+        db.commit()
+    
 
