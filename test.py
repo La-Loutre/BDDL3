@@ -71,7 +71,7 @@ def createTables():
     
     ## Create ITEMSPICTURES table (empty)
     try:
-        cur.execute("CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,`name` varchar(30) , PRIMARY KEY(id,name))")
+        cur.execute("CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,`name` varchar(100) , PRIMARY KEY(id,name))")
     except:
         print traceback.format_exc()
 
@@ -233,4 +233,4 @@ def generateWebSite():
     except:
         print traceback.format_exc()
     fichierHtml.close()
-generateWebSite()
+##generateWebSite()
