@@ -28,16 +28,20 @@ def createTables():
     global db
     cur = db.cursor()
     
+
+    ## Create items table (empty)
     try:
-        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(50),`description` bool,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id)) ")
+        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(50),`description` bool,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id),`picture` MEDIUMINT UNSIGNED ) ")
     except:
         print traceback.format_exc()
     
+
+    ## Create itemclass table and fill it 
     try:
         cur.execute("CREATE TABLE ITEMCLASS (`id` TINYINT UNSIGNED NOT NULL,`name` varchar(30),PRIMARY KEY(id))")
     except:
         print traceback.format_exc()
-        return None
+       
 
     fichierItemClass=open("itemClass.txt","r")
     line=fichierItemClass.readline()
@@ -49,6 +53,7 @@ def createTables():
 
     fichierItemClass.close()
 
+    ## Create itemsubclass table and fill it
     fichierItemSubClass=open("itemSubClass.txt","r")
     try:
         cur.execute("CREATE TABLE ITEMSUBCLASS (`idClass` TINYINT UNSIGNED NOT NULL,`idSubClass` TINYINT UNSIGNED NOT NULL, `name` varchar(30) ,`completeName` varchar(30),PRIMARY KEY(idClass,idSubClass)) ")
@@ -62,12 +67,23 @@ def createTables():
         line=fichierItemSubClass.readline()
 
     fichierItemSubClass.close()
-    cur.execute("SELECT * FROM ITEMSUBCLASS")
-    row=cur.fetchall()
+
     
+    ## Create ITEMSPICTURES table (empty)
+    try:
+        cur.execute("CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,`name` varchar(30) , PRIMARY KEY(id,name))")
+    except:
+        print traceback.format_exc()
+
+    
+    ## Show results
+    cur.execute("SELECT * FROM ITEMSUBCLASS")
+    row=cur.fetchall()    
     print row
+
+
+    ##Save results 
     db.commit()
-    db.close()
     
     
 
@@ -98,13 +114,37 @@ def getLeader3V3(ranking,moreInfo=True):
     if moreInfo:
         return info,info["name"],info["realmName"]
     
-def addItemToDB(curseurDb,item):
+def addItemToDB(database,item):
+    curseurDb=database.cursor()
+    try:
+        print "SELECT id FROM ITEMSPICTURES WHERE name='"+item["icon"].encode("utf-8")+"'"
+        curseurDb.execute("SELECT id FROM ITEMSPICTURES WHERE name='"+item["icon"].encode("utf-8")+"'")
+    
+        row =curseurDb.fetchone() 
+        print row
+        if row != None:
+            keyPicture=row[0]
+            print keyPicture
+        else:
+            curseurDb.execute("SELECT MAX(id) FROM ITEMSPICTURES ")
+            row =curseurDb.fetchone()
+            if row[0] == None:
+                maxIdItemsPicture=0
+            else:
+                print row
+                maxIdItemsPicture=int(row[0])+1
+            keyPicture=maxIdItemsPicture
+    except:
+        print traceback.format_exc()
+        return None
+    curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES("+str(keyPicture)+",'"+item["icon"].encode("utf-8")+"')")
+
+    
     description="true"
     if item["description"] == "":
         description="false"
-        
     try:
-        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",'"+item["name"].encode("utf-8")+"',"+description+","+str(item["itemLevel"])+")")
+        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",'"+item["name"].encode("utf-8")+"',"+description+","+str(item["itemLevel"])+","+str(keyPicture)+")")
     except:
         print traceback.format_exc()
     
@@ -112,6 +152,7 @@ def addItemToDB(curseurDb,item):
 def getItem(i):
     return getDataFromUrl(WOW_API_URL+"item/"+str(i))
         
+
 
 
 
