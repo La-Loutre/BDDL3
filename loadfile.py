@@ -1,3 +1,4 @@
+import traceback
 def loadcommand(fichier):
     line = fichier.readline()
     if line == "\n":
@@ -20,6 +21,7 @@ def loadfile(cur, filename):
             try:
                 cur.execute(para)
             except:
+                print traceback.format_exc()
                 print para
                 return None
         para=loadcommand(fichier)

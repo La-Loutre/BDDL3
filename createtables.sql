@@ -5,6 +5,7 @@ CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,
 		    `description` bool,
 		    `level` TINYINT UNSIGNED NOT NULL,
 		    `picture` MEDIUMINT UNSIGNED,
+		    `quality` TINYINT UNSIGNED NOT NULL,
 		    PRIMARY KEY (id));
 
 CREATE TABLE ITEMCLASS (`id` TINYINT UNSIGNED NOT NULL,
@@ -24,15 +25,6 @@ CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,
 CREATE TABLE ITEMSDESCRIPTIONS (`id` MEDIUMINT UNSIGNED NOT NULL,
 				`description` varchar(100) ,
 				PRIMARY KEY(id,description));
-
-CREATE TABLE WEAPON (`id` MEDIUMINT UNSIGNED NOT NULL,
-		     `requiredLevel` TINYINT UNSIGNED NOT NULL,
-		     `damageMax` SMALLINT UNSIGNED,
-		     `damageMin` SMALLINT UNSIGNED,
-		     `dps` DECIMAL(8,3),
-		     `weaponSpeed` DECIMAL(5,3),
-		     `maxDurability` TINYINT UNSIGNED,
-		     PRIMARY KEY(id));
 
 CREATE TABLE BONUSSTATS (`id` TINYINT UNSIGNED NOT NULL,
 			 `description` varchar(50),
@@ -65,3 +57,12 @@ CREATE TABLE PLAYERS (`name` varchar(50),
 		      `waistId` MEDIUMINT UNSIGNED,
 		      `wristId` MEDIUMINT UNSIGNED,
 		      PRIMARY KEY(name, server));
+
+CREATE TABLE WEAPON (`id` MEDIUMINT UNSIGNED NOT NULL,
+		     `requiredLevel` TINYINT UNSIGNED NOT NULL,
+		     `damageMax` SMALLINT UNSIGNED,
+		     `damageMin` SMALLINT UNSIGNED,
+		     `dps` DECIMAL(8,3),
+		     `weaponSpeed` DECIMAL(5,3),
+		     `maxDurability` TINYINT UNSIGNED,
+		     PRIMARY KEY(id));

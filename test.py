@@ -3,6 +3,7 @@ import MySQLdb,MySQLdb.cursors
 from passwd import *
 import urllib2
 import traceback
+from loadfile import *
 
 # db=MySQLdb.connect(host="dbserver",
 #                    user="ldouriez",
@@ -28,21 +29,8 @@ def createTables():
     global db
     cur = db.cursor()
     
-
-    ## Create items table (empty)
-    try:
-        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(100),`description` MEDIUMINT,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id),`picture` MEDIUMINT UNSIGNED ) ")
-    except:
-        print traceback.format_exc()
+    loadfile(cur,"createtables.sql")
     
-
-    ## Create itemclass table and fill it 
-    try:
-        cur.execute("CREATE TABLE ITEMCLASS (`id` TINYINT UNSIGNED NOT NULL,`name` varchar(30),PRIMARY KEY(id))")
-    except:
-        print traceback.format_exc()
-       
-
     fichierItemClass=open("itemClass.txt","r")
     line=fichierItemClass.readline()
     while line != "":
@@ -50,16 +38,11 @@ def createTables():
         line=fichierItemClass.readline()
         print splitedLine[0],splitedLine[1]
         cur.execute("INSERT INTO ITEMCLASS VALUES("+splitedLine[0]+",'"+splitedLine[1].split("\n")[0]+"')")
-
     fichierItemClass.close()
 
-    ## Create itemsubclass table and fill it
+
+
     fichierItemSubClass=open("itemSubClass.txt","r")
-    try:
-        cur.execute("CREATE TABLE ITEMSUBCLASS (`idClass` TINYINT UNSIGNED NOT NULL,`idSubClass` TINYINT UNSIGNED NOT NULL, `name` varchar(30) ,`completeName` varchar(30),PRIMARY KEY(idClass,idSubClass)) ")
-    except:
-        print traceback.format_exc()
-       
     line=fichierItemSubClass.readline()
     while line != "":
         splitedLine = line.split(",")
@@ -67,30 +50,6 @@ def createTables():
         line=fichierItemSubClass.readline()
 
     fichierItemSubClass.close()
-
-    
-    ## Create ITEMSPICTURES table (empty)
-    try:
-        cur.execute("CREATE TABLE ITEMSPICTURES (`id` MEDIUMINT UNSIGNED NOT NULL,`name` varchar(100) , PRIMARY KEY(id,name))")
-    except:
-        print traceback.format_exc()
-
-    ## Create ITEMSDESCRIPTION table (empty)
-    try:
-        cur.execute("CREATE TABLE ITEMSDESCRIPTIONS (`id` MEDIUMINT UNSIGNED NOT NULL,`description` varchar(100) , PRIMARY KEY(id,description))")
-    except:
-        print traceback.format_exc()
-
-    ## Create PLAYERS table (empty)
-    try:
-        cur.execute("CREATE TABLE PLAYERS (`name` varchar(50),`server` varchar(50),`genderId` TINYINT UNSIGNED, `factionId` TINYINT UNSIGNED,`raceId` TINYINT,`level` TINYINT UNSIGNED,`thumbnail` varchar(100),`backId` MEDIUMINT,`chestID` MEDIUMINT UNSIGNED,`feetId` MEDIUMINT UNSIGNED,`finger1Id` MEDIUMINT UNSIGNED,`finger2Id` MEDIUMINT UNSIGNED,`handsId` MEDIUMINT UNSIGNED,`legsId` MEDIUMINT UNSIGNED,`mainHandId` MEDIUMINT UNSIGNED,`neckId` MEDIUMINT UNSIGNED,`shoulderId` MEDIUMINT UNSIGNED,`trinket1Id` MEDIUMINT UNSIGNED,`trinket2Id` MEDIUMINT UNSIGNED,`waistId` MEDIUMINT UNSIGNED,`wristId` MEDIUMINT UNSIGNED)")
-    ## Show results
-    except:
-        print traceback.format_exc()
-    cur.execute("SELECT * FROM ITEMSUBCLASS")
-    row=cur.fetchall()    
-    print row
-
 
     ##Save results 
     db.commit()
@@ -179,15 +138,35 @@ def addItemPicture(curseurDb,item):
         return None
     return keyPicture
 
+def addItemsPlayer(curseurDb,items):
+    itemsToBeAdded=[items["back"],
+                    items["feet"],
+                    items["finger1"],
+                    items["finger2"],
+                    items["chest"],
+                    items["hands"],
+                    items["legs"],
+                    items["mainHand"],
+                    items["neck"],
+                    items["shoulder"],
+                    items["trinket1"],
+                    items["trinket2"],
+                    items["waist"],
+                    items["wrist"]]
+    for i in range(len(itemsToBeAdded)):
+        item=getItem(itemsToBeAdded[i]["id"])
+        addItemToDB(curseurDb,item)
+    
 def addPlayerToDB(curseurDb,infoPlayer,playerName,serverName):
     itemsProfile=getPlayerProfile(serverName,playerName,"?fields=items")
     try:
         curseurDb.execute("INSERT INTO PLAYERS VALUES(\"{playerNamee}\",\"{serverNamee}\",{genderId},{factionId},{raceId},{level},\"{thumbnail}\",{backId},{chestId},{feetId},{finger1Id},{finger2Id},{handsId},{legsId},{mainHandId},{neckId},{shoulderId},{trinket1Id},{trinket2Id},{waistId},{wristId})".format(playerNamee=playerName,serverNamee=serverName,genderId=str(infoPlayer["genderId"]),factionId=str(infoPlayer["factionId"]),raceId=str(infoPlayer["raceId"]),level=str(itemsProfile["level"]),thumbnail=itemsProfile["thumbnail"],backId=str(itemsProfile["items"]["back"]["id"]),chestId=str(itemsProfile["items"]["chest"]["id"]),feetId=str(itemsProfile["items"]["feet"]["id"]),finger1Id=str(itemsProfile["items"]["finger1"]["id"]),finger2Id=str(itemsProfile["items"]["finger2"]["id"]),handsId=str(itemsProfile["items"]["hands"]["id"]),legsId=str(itemsProfile["items"]["legs"]["id"]),mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),neckId=str(itemsProfile["items"]["neck"]["id"]),shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),waistId=str(itemsProfile["items"]["waist"]["id"]),wristId=str(itemsProfile["items"]["wrist"]["id"])))
+        addItemsPlayer(curseurDb,itemsProfile["items"])
         return True
     except :
         print traceback.format_exc()
         print itemsProfile
-        print "INSERT INTO PLAYERS VALUES(\"{playerNamee}\",\"{serverNamee}\",{genderId},{factionId},{raceId},{level},\"{thumbnail}\",{backId},{chestId},{feetId},{finger1Id},{finger2Id},{handsId},{legsId},{mainHandId},{neckId},{shoulderId},{trinket1Id},{trinket2Id},{waistId},{wristId}".format(playerNamee=playerName,serverNamee=serverName,genderId=str(infoPlayer["genderId"]),factionId=str(infoPlayer["factionId"]),raceId=str(infoPlayer["raceId"]),level=str(itemsProfile["level"]),thumbnail=itemsProfile["thumbnail"],backId=str(itemsProfile["items"]["back"]["id"]),chestId=str(itemsProfile["items"]["chest"]["id"]),feetId=str(itemsProfile["items"]["feet"]["id"]),finger1Id=str(itemsProfile["items"]["finger1"]["id"]),finger2Id=str(itemsProfile["items"]["finger2"]["id"]),handsId=str(itemsProfile["items"]["hands"]["id"]),legsId=str(itemsProfile["items"]["legs"]["id"]),mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),neckId=str(itemsProfile["items"]["neck"]["id"]),shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),waistId=str(itemsProfile["items"]["waist"]["id"]),wristId=str(itemsProfile["items"]["wrist"]["id"]))
+        print "INSERT INTO PLAYERS VALUES(\"{playerNamee}\",\"{serverNamee}\",{genderId},{factionId},{raceId},{level},\"{thumbnail}\",{backId},{chestId},{feetId},{finger1Id},{finger2Id},{handsId},{legsId},{mainHandId},{neckId},{shoulderId},{trinket1Id},{trinket2Id},{waistId},{wristId})".format(playerNamee=playerName,serverNamee=serverName,genderId=str(infoPlayer["genderId"]),factionId=str(infoPlayer["factionId"]),raceId=str(infoPlayer["raceId"]),level=str(itemsProfile["level"]),thumbnail=itemsProfile["thumbnail"],backId=str(itemsProfile["items"]["back"]["id"]),chestId=str(itemsProfile["items"]["chest"]["id"]),feetId=str(itemsProfile["items"]["feet"]["id"]),finger1Id=str(itemsProfile["items"]["finger1"]["id"]),finger2Id=str(itemsProfile["items"]["finger2"]["id"]),handsId=str(itemsProfile["items"]["hands"]["id"]),legsId=str(itemsProfile["items"]["legs"]["id"]),mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),neckId=str(itemsProfile["items"]["neck"]["id"]),shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),waistId=str(itemsProfile["items"]["waist"]["id"]),wristId=str(itemsProfile["items"]["wrist"]["id"]))
         return None
     
     
@@ -203,7 +182,7 @@ def addItemToDB(curseurDb,item):
         return None
 
     try:        
-        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+")")
+        curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")")
 
     except:
         print "INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+description+","+str(item["itemLevel"])+","+str(keyPicture)+")"
@@ -216,6 +195,12 @@ def getItem(i):
 
 
 
+def testAddPlayer(ranking):
+    info,name,server=getLeader3V3(ranking)
+    cur=db.cursor()
+    if(addPlayerToDB(cur,info,name,server)!=None):
+        db.commit()
+    cur.close()
 
 def testAddItem(start,end):
     cursorDb=db.cursor()
@@ -224,6 +209,7 @@ def testAddItem(start,end):
         if item != None:
             addItemToDB(cursorDb,item)
         db.commit()
+    cursorDb.close()
     
 def getTypes(typeid,subtypeid):
     cursor=MySQLdb.cursors.DictCursor(db)
@@ -249,30 +235,39 @@ def generateItemPage(row,imgName,fileName):
     newHtml.close()
     cursor.close()
 def generateWebSite():
+    colors=["color:#B3B3B3",
+            "color:#FFFFFF",
+            "color:00FF26",
+            "color:0D00FF",
+            "color:BC00FF",
+            "color:FF9E00",
+            "color:FACD86"]
     cursorDb=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
     fichierHtml=open("sortie.html","w")
-    fichierHtml.write("<table> "+
-                      "<tr> <th>Nom</th>\n"+
-                      "<th>Image</th></tr>")
+    fichierHtml.write("<table style=\"background:#000000\"> "+
+                      "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
+                      "<th style=\"color:#FFFFFF\"> Image</th></tr>")
     try:
         cursorDb.execute("SELECT * FROM ITEMS")
         for row in cursorDb:
            
-            cursorDb2.execute("SELECT name FROM ITEMSPICTURES WHERE id="+str(row["picture"]))
+            cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(row["picture"]))
             row2=cursorDb2.fetchone()
             nomLien=row["name"].decode(encoding="ascii",errors="ignore")
             nomLien=nomLien.replace(" ","")
+            nomLien=nomLien.replace(":","")
             print nomLien
             imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
-            fichierHtml.write("<tr><td><a href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=row["name"],nomlien=nomLien,img=imgLink))
+            fichierHtml.write("<tr><td><a style=\"{colorQuality}\" href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=row["name"],nomlien=nomLien,img=imgLink,colorQuality=colors[row["quality"]]))
             generateItemPage(row,imgLink,nomLien)
         fichierHtml.write("</table>")
     except:
         print traceback.format_exc()
     fichierHtml.close()
 ##generateWebSite()
-info,name,server=getLeader3V3(3)
-cur=db.cursor()
-if(addPlayerToDB(cur,info,name,server)!=None):
-    db.commit()
+# info,name,server=getLeader3V3(3)
+# cur=db.cursor()
+# if(addPlayerToDB(cur,info,name,server)!=None):
+#     db.commit()
+#     generateWebSite()
