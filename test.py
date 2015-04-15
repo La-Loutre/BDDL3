@@ -31,7 +31,7 @@ def createTables():
 
     ## Create items table (empty)
     try:
-        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(100),`description` bool,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id),`picture` MEDIUMINT UNSIGNED ) ")
+        cur.execute("CREATE TABLE ITEMS (`id` MEDIUMINT UNSIGNED NOT NULL,`classid` TINYINT UNSIGNED NOT NULL,`subclassid` TINYINT UNSIGNED NOT NULL,`name` varchar(100),`description` MEDIUMINT,`level` TINYINT UNSIGNED NOT NULL,PRIMARY KEY (id),`picture` MEDIUMINT UNSIGNED ) ")
     except:
         print traceback.format_exc()
     
@@ -81,8 +81,12 @@ def createTables():
     except:
         print traceback.format_exc()
 
-        
+    ## Create PLAYERS table (empty)
+    try:
+        cur.execute("CREATE TABLE PLAYERS (`name` varchar(50),`server` varchar(50),`genderId` TINYINT UNSIGNED, `factionId` TINYINT UNSIGNED,`raceId` TINYINT,`level` TINYINT UNSIGNED,`thumbnail` varchar(100),`backId` MEDIUMINT,`chestID` MEDIUMINT UNSIGNED,`feetId` MEDIUMINT UNSIGNED,`finger1Id` MEDIUMINT UNSIGNED,`finger2Id` MEDIUMINT UNSIGNED,`handsId` MEDIUMINT UNSIGNED,`legsId` MEDIUMINT UNSIGNED,`mainHandId` MEDIUMINT UNSIGNED,`neckId` MEDIUMINT UNSIGNED,`shoulderId` MEDIUMINT UNSIGNED,`trinket1Id` MEDIUMINT UNSIGNED,`trinket2Id` MEDIUMINT UNSIGNED,`waistId` MEDIUMINT UNSIGNED,`wristId` MEDIUMINT UNSIGNED)")
     ## Show results
+    except:
+        print traceback.format_exc()
     cur.execute("SELECT * FROM ITEMSUBCLASS")
     row=cur.fetchall()    
     print row
@@ -96,7 +100,7 @@ def createTables():
 WOW_API_URL="http://eu.battle.net/api/wow/"
 WOW_MEDIUM_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/56/"
 WOW_SMALL_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/36/"
-LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR"}
+LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR","None":""}
 DEBUG=True
 def getDataFromUrl(url,local="fr"):
     global LOCALS
@@ -114,7 +118,7 @@ def getDataFromUrl(url,local="fr"):
 
 
 def getPlayerProfile(serverName,playerName,field=""):
-    return getDataFromUrl(WOW_API_URL+"character/"+serverName+"/"+playerName+field)
+    return getDataFromUrl(WOW_API_URL+"character/"+serverName+"/"+playerName+field,"None")
 def getLeader3V3(ranking,moreInfo=True):
     assert(ranking>=1)
     # No trycatch 
@@ -174,6 +178,18 @@ def addItemPicture(curseurDb,item):
         print traceback.format_exc()
         return None
     return keyPicture
+
+def addPlayerToDB(curseurDb,infoPlayer,playerName,serverName):
+    itemsProfile=getPlayerProfile(serverName,playerName,"?fields=items")
+    try:
+        curseurDb.execute("INSERT INTO PLAYERS VALUES(\"{playerNamee}\",\"{serverNamee}\",{genderId},{factionId},{raceId},{level},\"{thumbnail}\",{backId},{chestId},{feetId},{finger1Id},{finger2Id},{handsId},{legsId},{mainHandId},{neckId},{shoulderId},{trinket1Id},{trinket2Id},{waistId},{wristId})".format(playerNamee=playerName,serverNamee=serverName,genderId=str(infoPlayer["genderId"]),factionId=str(infoPlayer["factionId"]),raceId=str(infoPlayer["raceId"]),level=str(itemsProfile["level"]),thumbnail=itemsProfile["thumbnail"],backId=str(itemsProfile["items"]["back"]["id"]),chestId=str(itemsProfile["items"]["chest"]["id"]),feetId=str(itemsProfile["items"]["feet"]["id"]),finger1Id=str(itemsProfile["items"]["finger1"]["id"]),finger2Id=str(itemsProfile["items"]["finger2"]["id"]),handsId=str(itemsProfile["items"]["hands"]["id"]),legsId=str(itemsProfile["items"]["legs"]["id"]),mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),neckId=str(itemsProfile["items"]["neck"]["id"]),shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),waistId=str(itemsProfile["items"]["waist"]["id"]),wristId=str(itemsProfile["items"]["wrist"]["id"])))
+        return True
+    except :
+        print traceback.format_exc()
+        print itemsProfile
+        print "INSERT INTO PLAYERS VALUES(\"{playerNamee}\",\"{serverNamee}\",{genderId},{factionId},{raceId},{level},\"{thumbnail}\",{backId},{chestId},{feetId},{finger1Id},{finger2Id},{handsId},{legsId},{mainHandId},{neckId},{shoulderId},{trinket1Id},{trinket2Id},{waistId},{wristId}".format(playerNamee=playerName,serverNamee=serverName,genderId=str(infoPlayer["genderId"]),factionId=str(infoPlayer["factionId"]),raceId=str(infoPlayer["raceId"]),level=str(itemsProfile["level"]),thumbnail=itemsProfile["thumbnail"],backId=str(itemsProfile["items"]["back"]["id"]),chestId=str(itemsProfile["items"]["chest"]["id"]),feetId=str(itemsProfile["items"]["feet"]["id"]),finger1Id=str(itemsProfile["items"]["finger1"]["id"]),finger2Id=str(itemsProfile["items"]["finger2"]["id"]),handsId=str(itemsProfile["items"]["hands"]["id"]),legsId=str(itemsProfile["items"]["legs"]["id"]),mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),neckId=str(itemsProfile["items"]["neck"]["id"]),shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),waistId=str(itemsProfile["items"]["waist"]["id"]),wristId=str(itemsProfile["items"]["wrist"]["id"]))
+        return None
+    
     
 def addItemToDB(curseurDb,item):
 
@@ -256,3 +272,7 @@ def generateWebSite():
         print traceback.format_exc()
     fichierHtml.close()
 ##generateWebSite()
+info,name,server=getLeader3V3(3)
+cur=db.cursor()
+if(addPlayerToDB(cur,info,name,server)!=None):
+    db.commit()
