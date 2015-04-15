@@ -160,13 +160,53 @@ def addItemsPlayer(curseurDb,items):
 def addPlayerToDB(curseurDb,infoPlayer,playerName,serverName):
     itemsProfile=getPlayerProfile(serverName,playerName,"?fields=items")
     try:
-        curseurDb.execute("INSERT INTO PLAYERS VALUES(\"{playerNamee}\",\"{serverNamee}\",{genderId},{factionId},{raceId},{level},\"{thumbnail}\",{backId},{chestId},{feetId},{finger1Id},{finger2Id},{handsId},{legsId},{mainHandId},{neckId},{shoulderId},{trinket1Id},{trinket2Id},{waistId},{wristId})".format(playerNamee=playerName,serverNamee=serverName,genderId=str(infoPlayer["genderId"]),factionId=str(infoPlayer["factionId"]),raceId=str(infoPlayer["raceId"]),level=str(itemsProfile["level"]),thumbnail=itemsProfile["thumbnail"],backId=str(itemsProfile["items"]["back"]["id"]),chestId=str(itemsProfile["items"]["chest"]["id"]),feetId=str(itemsProfile["items"]["feet"]["id"]),finger1Id=str(itemsProfile["items"]["finger1"]["id"]),finger2Id=str(itemsProfile["items"]["finger2"]["id"]),handsId=str(itemsProfile["items"]["hands"]["id"]),legsId=str(itemsProfile["items"]["legs"]["id"]),mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),neckId=str(itemsProfile["items"]["neck"]["id"]),shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),waistId=str(itemsProfile["items"]["waist"]["id"]),wristId=str(itemsProfile["items"]["wrist"]["id"])))
+        curseurDb.execute("""INSERT INTO PLAYERS VALUES(
+                          \"{playerNamee}\",
+                          \"{serverNamee}\",
+                          {genderId},
+                          {factionId},
+                          {raceId},
+                          {level},
+                          \"{thumbnail}\",
+                          {backId},
+                          {chestId},
+                          {feetId},
+                          {finger1Id},
+                          {finger2Id},
+                          {handsId},
+                          {legsId},
+                          {mainHandId},
+                          {neckId},
+                          {shoulderId},
+                          {trinket1Id},
+                          {trinket2Id},
+                          {waistId},
+                          {wristId})""".format(playerNamee=playerName,
+                                               serverNamee=serverName,
+                                               genderId=str(infoPlayer["genderId"]),
+                                               factionId=str(infoPlayer["factionId"]),
+                                               raceId=str(infoPlayer["raceId"]),
+                                               level=str(itemsProfile["level"]),
+                                               thumbnail=itemsProfile["thumbnail"],
+                                               backId=str(itemsProfile["items"]["back"]["id"]),
+                                               chestId=str(itemsProfile["items"]["chest"]["id"]),
+                                               feetId=str(itemsProfile["items"]["feet"]["id"]),
+                                               finger1Id=str(itemsProfile["items"]["finger1"]["id"]),
+                                               finger2Id=str(itemsProfile["items"]["finger2"]["id"]),
+                                               handsId=str(itemsProfile["items"]["hands"]["id"]),
+                                               legsId=str(itemsProfile["items"]["legs"]["id"]),
+                                               mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),
+                                               neckId=str(itemsProfile["items"]["neck"]["id"]),
+                                               shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),
+                                               trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),
+                                               trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),
+                                               waistId=str(itemsProfile["items"]["waist"]["id"]),
+                                               wristId=str(itemsProfile["items"]["wrist"]["id"])))
         addItemsPlayer(curseurDb,itemsProfile["items"])
         return True
     except :
         print traceback.format_exc()
         print itemsProfile
-        print "INSERT INTO PLAYERS VALUES(\"{playerNamee}\",\"{serverNamee}\",{genderId},{factionId},{raceId},{level},\"{thumbnail}\",{backId},{chestId},{feetId},{finger1Id},{finger2Id},{handsId},{legsId},{mainHandId},{neckId},{shoulderId},{trinket1Id},{trinket2Id},{waistId},{wristId})".format(playerNamee=playerName,serverNamee=serverName,genderId=str(infoPlayer["genderId"]),factionId=str(infoPlayer["factionId"]),raceId=str(infoPlayer["raceId"]),level=str(itemsProfile["level"]),thumbnail=itemsProfile["thumbnail"],backId=str(itemsProfile["items"]["back"]["id"]),chestId=str(itemsProfile["items"]["chest"]["id"]),feetId=str(itemsProfile["items"]["feet"]["id"]),finger1Id=str(itemsProfile["items"]["finger1"]["id"]),finger2Id=str(itemsProfile["items"]["finger2"]["id"]),handsId=str(itemsProfile["items"]["hands"]["id"]),legsId=str(itemsProfile["items"]["legs"]["id"]),mainHandId=str(itemsProfile["items"]["mainHand"]["id"]),neckId=str(itemsProfile["items"]["neck"]["id"]),shoulderId=str(itemsProfile["items"]["shoulder"]["id"]),trinket1Id=str(itemsProfile["items"]["trinket1"]["id"]),trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),waistId=str(itemsProfile["items"]["waist"]["id"]),wristId=str(itemsProfile["items"]["wrist"]["id"]))
         return None
     
     
@@ -222,6 +262,50 @@ def getTypes(typeid,subtypeid):
         return typeValue["name"], subTypeValue["completeName"]
     else:
         return typeValue["name"], subTypeValue["name"]
+
+def generatePlayerPage(row,filename):
+    colors=["color:#B3B3B3",
+            "color:#FFFFFF",
+            "color:00FF26",
+            "color:0D00FF",
+            "color:BC00FF",
+            "color:FF9E00",
+            "color:FACD86"]
+    
+    newHtml=open(filename+".html","w")
+    cursor=MySQLdb.cursors.DictCursor(db)
+    cursorDb2=MySQLdb.cursors.DictCursor(db)
+    items=row
+    itemsList=[items["backId"],
+               items["feetId"],
+               items["finger1Id"],
+               items["finger2Id"],
+               items["chestId"],
+               items["handsId"],
+               items["legsId"],
+               items["mainHandId"],
+               items["neckId"],
+               items["shoulderId"],
+               items["trinket1Id"],
+               items["trinket2Id"],
+               items["waistId"],
+               items["wristId"]]
+    newHtml.write("<table style=\"background:#000000\"> "+
+                      "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
+                      "<th style=\"color:#FFFFFF\"> Image</th></tr>")    
+    for i in range(len(itemsList)):
+        cursor.execute("SELECT * FROM ITEMS WHERE id={id}".format(id=str(itemsList[i])))
+        itemFound=cursor.fetchone()
+        cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(itemFound["picture"]))
+        row2=cursorDb2.fetchone()
+
+        nomLien=itemFound["name"].decode(encoding="ascii",errors="ignore")
+        nomLien=nomLien.replace(" ","")
+        nomLien=nomLien.replace(":","")
+        imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
+        newHtml.write("<tr><td><a style=\"{colorQuality}\" href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=itemFound["name"],nomlien=nomLien,img=imgLink,colorQuality=colors[itemFound["quality"]]))
+    newHtml.write("</table>")
+
 def generateItemPage(row,imgName,fileName):
     newHtml=open(fileName+".html","w")
 
@@ -230,7 +314,7 @@ def generateItemPage(row,imgName,fileName):
     descriptionValue=cursor.fetchone()["description"]
     print str(row["classid"]) , str(row["subclassid"])
     typeValue,subTypeValue=getTypes(str(row["classid"]),str(row["subclassid"]))
-
+    
     newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
     newHtml.close()
     cursor.close()
@@ -262,6 +346,16 @@ def generateWebSite():
             fichierHtml.write("<tr><td><a style=\"{colorQuality}\" href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=row["name"],nomlien=nomLien,img=imgLink,colorQuality=colors[row["quality"]]))
             generateItemPage(row,imgLink,nomLien)
         fichierHtml.write("</table>")
+    except:
+        print traceback.format_exc()
+
+    try:
+        cursorDb.execute("SELECT * FROM PLAYERS")
+        for row in cursorDb:
+            nomHtml=row["name"].decode(encoding="ascii",errors="ignore")
+            nomHtml=nomHtml.replace(" ","")
+            nomHtml=nomHtml.replace(":","")
+            generatePlayerPage(row,nomHtml)
     except:
         print traceback.format_exc()
     fichierHtml.close()
