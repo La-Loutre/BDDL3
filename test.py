@@ -236,6 +236,9 @@ def generateWebSite():
     cursorDb=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
     fichierHtml=open("sortie.html","w")
+    fichierHtml.write("<table> "+
+                      "<tr> <th>Nom</th>\n"+
+                      "<th>Image</th></tr>")
     try:
         cursorDb.execute("SELECT * FROM ITEMS")
         for row in cursorDb:
@@ -246,8 +249,9 @@ def generateWebSite():
             nomLien=nomLien.replace(" ","")
             print nomLien
             imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
-            fichierHtml.write("<p><a href={nomlien}.html>{nom}</a>".format(nom=row["name"],nomlien=nomLien)+" <img src="+imgLink+"></p>")
+            fichierHtml.write("<tr><td><a href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=row["name"],nomlien=nomLien,img=imgLink))
             generateItemPage(row,imgLink,nomLien)
+        fichierHtml.write("</table>")
     except:
         print traceback.format_exc()
     fichierHtml.close()
