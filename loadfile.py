@@ -1,5 +1,7 @@
 def loadcommand(fichier):
     line = fichier.readline()
+    if line == "\n":
+        return False
     if line == "":
         return None
     paragraphe = line
@@ -14,9 +16,15 @@ def loadfile(cur, filename):
     fichier = open(filename)
     para=loadcommand(fichier)
     while para != None:
-        cur.execute(para)
+        if para != False:
+            try:
+                cur.execute(para)
+            except:
+                print para
+                return None
         para=loadcommand(fichier)
 
+        
 
 # from test import *        
 # cur = db.cursor()
