@@ -1,0 +1,57 @@
+0: "?????????", # WTF is this? (item:80072)
+1: "Health", # -Removed-
+2: "Mana", # -Removed-
+3: "Agility", # Agility
+4: "Strength", # Strength
+5: "Intellect", # Intellect
+6: "Spirit", # Spirit
+7: "Stamina", # Stamina
+8: "?????????", # N/A
+9: "?????????", # N/A
+10: "?????????", # N/A
+11: "?????????", # N/A
+12: "Defense", # -Removed-
+13: "Dodge", # Dodge
+14: "Parry", # Parry
+15: "Block rating", # -Removed-
+16: "Melee hit", # -Replaced by Hit-
+17: "Ranged hit", # -Replaced by Hit-
+18: "Spell hit", # -Replaced by Hit-
+19: "Melee crit", # -Replaced by Crit-
+20: "Range Crit", # Ranged Critical Strike (item:30318)
+21: "Spell crit", # -Replaced by Crit-
+22: "Melee avoid", # -Removed-
+23: "Ranged avoid", # -Removed-
+24: "Spell avoid", # -Removed-
+25: "M crit avoid", # -Removed-
+26: "R crit avoid", # -Removed-
+27: "S crit avoid", # -Removed-
+28: "Melee haste", # -Replaced by Haste-
+29: "Ranged haste", # -Replaced by Haste-
+30: "Spell haste", # -Replaced by Haste-
+31: "Hit", # Hit
+32: "Crit", # Crit
+33: "Hit avoid", # -Replaced by Resil-
+34: "Crit avoid", # -Replaced by Resil-
+35: "Resil", # Pvp Resilience
+36: "Haste", # Haste
+37: "Expertise", # Expertise
+38: "Attack Power", # Attack Power
+39: "Ranged AP", # Ranged Attack Power (item:10510)
+40: "Feral AP", # -Replaced by DPS-
+41: "Increase dmg", # -Removed-
+42: "Increase heal", # -Removed-
+43: "Mp5", # -Replaced by Spirit-
+44: "ArP", # -Removed- (RIP best stat ever)
+45: "Spell Power", # Spell Power
+46: "Health Regen", # Health Regeneration
+47: "Spell pen", # -Removed-
+48: "Block Value", # -Removed-
+49: "Mastery", # Mastery
+50: "Armor", # Armor (bonus armor, not baseArmor)
+51: "Fire Resist", # Fire Resistance
+52: "Frost Resist", # Frost Resistance
+54: "Shadow Resist", # Shadow Resistance
+55: "Nature Resist", # Nature Resistance
+56: "Arcane Resist", # Arcane Resistance
+57: "Pvp Power", # Pvp Power
