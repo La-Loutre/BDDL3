@@ -4,27 +4,13 @@ from passwd import *
 import urllib2
 import traceback
 from loadfile import *
-
-# db=MySQLdb.connect(host="dbserver",
-#                    user="ldouriez",
-#                    passwd=p,
-#                    db="ldouriez"
-#                    )
-
-# cur = db.cursor()
-# try:
-#     cur.execute("CREATE TABLE ok3 (`ok` varchar(50))")
-#     cur.execute("INSERT INTO ok3 VALUES('okok')")
-#     cur.execute("SELECT * FROM ok3")
-#     row=cur.fetchone()
-#     print row
-# except MySQLdb.Error,e:
-#     print(e.args[0],e.args[1])
-#     db.rollback()#9738 - 75136
+from globals import *
 
 
-# db.close()
-db=MySQLdb.connect(host="localhost",user="louis",passwd=p,db="wowdb")
+
+
+from websiteGeneration import *
+
 def createTables():
     global db
     cur = db.cursor()
@@ -56,11 +42,7 @@ def createTables():
     
     
 
-WOW_API_URL="http://eu.battle.net/api/wow/"
-WOW_MEDIUM_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/56/"
-WOW_SMALL_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/36/"
-LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR","None":""}
-DEBUG=True
+
 def getDataFromUrl(url,local="fr"):
     global LOCALS
     global DEBUG
@@ -225,7 +207,8 @@ def addItemToDB(curseurDb,item):
         curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")")
 
     except:
-        print "INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+description+","+str(item["itemLevel"])+","+str(keyPicture)+")"
+        print "INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")"
+        
         print traceback.format_exc()
     
 
@@ -251,117 +234,11 @@ def testAddItem(start,end):
         db.commit()
     cursorDb.close()
     
-def getTypes(typeid,subtypeid):
-    cursor=MySQLdb.cursors.DictCursor(db)
-    cursor.execute("SELECT name FROM ITEMCLASS WHERE id={id}".format(id=typeid))
-    typeValue=cursor.fetchone()
-    cursor.execute("SELECT * FROM ITEMSUBCLASS WHERE idClass={idClass} AND idSubClass={idSubClass}".format(idClass=typeid,idSubClass=subtypeid))
-    subTypeValue=cursor.fetchone()
-    cursor.close()
-    if subTypeValue["completeName"]!="NULL":
-        return typeValue["name"], subTypeValue["completeName"]
-    else:
-        return typeValue["name"], subTypeValue["name"]
 
-def generatePlayerPage(row,filename):
-    colors=["color:#B3B3B3",
-            "color:#FFFFFF",
-            "color:00FF26",
-            "color:0D00FF",
-            "color:BC00FF",
-            "color:FF9E00",
-            "color:FACD86"]
-    
-    newHtml=open(filename+".html","w")
-    cursor=MySQLdb.cursors.DictCursor(db)
-    cursorDb2=MySQLdb.cursors.DictCursor(db)
-    items=row
-    itemsList=[items["backId"],
-               items["feetId"],
-               items["finger1Id"],
-               items["finger2Id"],
-               items["chestId"],
-               items["handsId"],
-               items["legsId"],
-               items["mainHandId"],
-               items["neckId"],
-               items["shoulderId"],
-               items["trinket1Id"],
-               items["trinket2Id"],
-               items["waistId"],
-               items["wristId"]]
-    newHtml.write("<table style=\"background:#000000\"> "+
-                      "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
-                      "<th style=\"color:#FFFFFF\"> Image</th></tr>")    
-    for i in range(len(itemsList)):
-        cursor.execute("SELECT * FROM ITEMS WHERE id={id}".format(id=str(itemsList[i])))
-        itemFound=cursor.fetchone()
-        cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(itemFound["picture"]))
-        row2=cursorDb2.fetchone()
-
-        nomLien=itemFound["name"].decode(encoding="ascii",errors="ignore")
-        nomLien=nomLien.replace(" ","")
-        nomLien=nomLien.replace(":","")
-        imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
-        newHtml.write("<tr><td><a style=\"{colorQuality}\" href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=itemFound["name"],nomlien=nomLien,img=imgLink,colorQuality=colors[itemFound["quality"]]))
-    newHtml.write("</table>")
-
-def generateItemPage(row,imgName,fileName):
-    newHtml=open(fileName+".html","w")
-
-    cursor=MySQLdb.cursors.DictCursor(db)
-    cursor.execute("SELECT description FROM ITEMSDESCRIPTIONS WHERE id={idDesc}".format(idDesc=str(row["description"])))
-    descriptionValue=cursor.fetchone()["description"]
-    print str(row["classid"]) , str(row["subclassid"])
-    typeValue,subTypeValue=getTypes(str(row["classid"]),str(row["subclassid"]))
-    
-    newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
-    newHtml.close()
-    cursor.close()
-def generateWebSite():
-    colors=["color:#B3B3B3",
-            "color:#FFFFFF",
-            "color:00FF26",
-            "color:0D00FF",
-            "color:BC00FF",
-            "color:FF9E00",
-            "color:FACD86"]
-    cursorDb=MySQLdb.cursors.DictCursor(db)
-    cursorDb2=MySQLdb.cursors.DictCursor(db)
-    fichierHtml=open("sortie.html","w")
-    fichierHtml.write("<table style=\"background:#000000\"> "+
-                      "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
-                      "<th style=\"color:#FFFFFF\"> Image</th></tr>")
-    try:
-        cursorDb.execute("SELECT * FROM ITEMS")
-        for row in cursorDb:
-           
-            cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(row["picture"]))
-            row2=cursorDb2.fetchone()
-            nomLien=row["name"].decode(encoding="ascii",errors="ignore")
-            nomLien=nomLien.replace(" ","")
-            nomLien=nomLien.replace(":","")
-            print nomLien
-            imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
-            fichierHtml.write("<tr><td><a style=\"{colorQuality}\" href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=row["name"],nomlien=nomLien,img=imgLink,colorQuality=colors[row["quality"]]))
-            generateItemPage(row,imgLink,nomLien)
-        fichierHtml.write("</table>")
-    except:
-        print traceback.format_exc()
-
-    try:
-        cursorDb.execute("SELECT * FROM PLAYERS")
-        for row in cursorDb:
-            nomHtml=row["name"].decode(encoding="ascii",errors="ignore")
-            nomHtml=nomHtml.replace(" ","")
-            nomHtml=nomHtml.replace(":","")
-            generatePlayerPage(row,nomHtml)
-    except:
-        print traceback.format_exc()
-    fichierHtml.close()
 ##generateWebSite()
 # info,name,server=getLeader3V3(3)
 # cur=db.cursor()
 # if(addPlayerToDB(cur,info,name,server)!=None):
+
 #     db.commit()
 #     generateWebSite()
