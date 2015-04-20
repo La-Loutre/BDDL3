@@ -584,12 +584,10 @@ CREATE TABLE IF NOT EXISTS `TALENTS` (
 
 CREATE TABLE IF NOT EXISTS `WEAPON` (
   `id` mediumint(8) unsigned NOT NULL,
-  `requiredLevel` tinyint(3) unsigned NOT NULL,
   `damageMax` smallint(5) unsigned default NULL,
   `damageMin` smallint(5) unsigned default NULL,
   `dps` decimal(8,3) default NULL,
   `weaponSpeed` decimal(5,3) default NULL,
-  `maxDurability` tinyint(3) unsigned default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -618,8 +616,6 @@ ALTER TABLE `FRIENDS`
 --
 -- Contraintes pour la table `ITEMCLASS`
 --
-ALTER TABLE `ITEMCLASS`
-  ADD CONSTRAINT `ITEMCLASS_ibfk_1` FOREIGN KEY (`id`) REFERENCES `ITEMSUBCLASS` (`idClass`);
 
 --
 -- Contraintes pour la table `ITEMS`

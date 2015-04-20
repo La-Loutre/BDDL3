@@ -11,19 +11,36 @@ from globals import *
 
 from websiteGeneration import *
 
+
+def bonusStats(filename="bonusStats.txt"):
+    database=db
+    cur = database.cursor()
+    fichier=open(filename,"r")
+    line=fichier.readline()
+    while line != "":
+        splited1=line.split(":")
+        idStat=splited1[0]
+        name=splited1[1].split(",")[0]
+        print idStat,name
+        print "INSERT INTO BONUSSTATS VALUES({id},\"{description}\")".format(id=idStat,description=name)
+        cur.execute("INSERT INTO BONUSSTATS VALUES({id},{description})".format(id=idStat,description=name))
+        line=fichier.readline()
+    cur.close()
+    database.commit()
 def createTables():
     global db
     cur = db.cursor()
     
-    loadfile(cur,"createtables.sql")
-    
+    ##loadfile(cur,"createtables.sql")
+   ## cur.execute("source createtables.sql")
     fichierItemClass=open("itemClass.txt","r")
     line=fichierItemClass.readline()
     while line != "":
         splitedLine=line.split(",",1)
-        line=fichierItemClass.readline()
-        print splitedLine[0],splitedLine[1]
+       
+       ## print splitedLine[0],splitedLine[1]
         cur.execute("INSERT INTO ITEMCLASS VALUES("+splitedLine[0]+",'"+splitedLine[1].split("\n")[0]+"')")
+        line=fichierItemClass.readline()
     fichierItemClass.close()
 
 
@@ -81,12 +98,12 @@ def addItemDescription(curseurDb,item):
             curseurDb.execute("SELECT MAX(id) FROM ITEMSDESCRIPTIONS ")
             row =curseurDb.fetchone()
             if row[0] == None:
-                maxIdItemsPicture=0
+                maxIdItemsPicture=1
             else:
                 print row
                 maxIdItemsPicture=int(row[0])+1
             keyDescription=maxIdItemsPicture
-            curseurDb.execute("INSERT INTO ITEMSDESCRIPTIONS VALUES("+str(keyDescription)+",\""+item["description"].encode("utf-8")+"\")")
+            curseurDb.execute("INSERT INTO ITEMSDESCRIPTIONS VALUES(NULL,\""+item["description"].encode("utf-8")+"\")")
     except:
         print traceback.format_exc()
         return None
@@ -109,12 +126,12 @@ def addItemPicture(curseurDb,item):
             curseurDb.execute("SELECT MAX(id) FROM ITEMSPICTURES ")
             row =curseurDb.fetchone()
             if row[0] == None:
-                maxIdItemsPicture=0
+                maxIdItemsPicture=1
             else:
                 print row
                 maxIdItemsPicture=int(row[0])+1
             keyPicture=maxIdItemsPicture
-            curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES("+str(keyPicture)+",\""+item["icon"].encode("utf-8")+"\")")
+            curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES(NULL,\""+item["icon"].encode("utf-8")+"\")")
     except:
         print traceback.format_exc()
         return None
@@ -192,8 +209,24 @@ def addPlayerToDB(curseurDb,infoPlayer,playerName,serverName):
         return None
     
     
-def addItemToDB(curseurDb,item):
-
+def addItemWeapon(curseurDb,item):
+    weaponInfo=item["weaponInfo"]
+    try:
+        curseurDb.execute("""INSERT INTO WEAPON VALUES(
+                         {id},
+                         {dmgMax},
+                         {dmgMin},
+                         {dps},
+                         {weaponspeed})
+                          """.format(id=item["id"],
+                                     dmgMax=weaponInfo["damage"]["max"],
+                                     dmgMin=weaponInfo["damage"]["min"],
+                                     dps=int(weaponInfo["dps"]),
+                                     weaponspeed=weaponInfo["weaponSpeed"]))
+    except:
+        print traceback.format_exc()
+def addItemToDB(database,item):
+    curseurDb=database.cursor()
     keyPicture=addItemPicture(curseurDb,item)
     if keyPicture == None:
         return None
@@ -202,9 +235,36 @@ def addItemToDB(curseurDb,item):
     keyDescription=addItemDescription(curseurDb,item)
     if keyDescription == None:
         return None
+    
+    
 
     try:        
         curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")")
+        
+        cursorDb2=MySQLdb.cursors.DictCursor(database)
+        cursorDb2.execute("SELECT * FROM ITEMCLASS WHERE id={idItem}".format(idItem=str(item["itemClass"]))) 
+        row = cursorDb2.fetchone()
+        if row["name"] == "Weapon":
+            addItemWeapon(curseurDb,item)
+
+
+            
+            
+        bonusStats=item["bonusStats"]
+        nbStat=len(bonusStats)
+        if len(bonusStats) > 0 :
+            for i in range(len(bonusStats)):
+                stat=bonusStats[i]
+                cursorDb2.execute("""INSERT INTO ITEMSTAT VALUES(
+                                 {id},
+                                 {statid},
+                                 {amount})
+                              """.format(id=item["id"],
+                                         statid=stat["stat"],
+                                         amount=stat["amount"]))
+        cursorDb2.close()
+
+        
 
     except:
         print "INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")"
@@ -226,13 +286,13 @@ def testAddPlayer(ranking):
     cur.close()
 
 def testAddItem(start,end):
-    cursorDb=db.cursor()
+
     for i in range(start,end):
         item=getItem(i)
         if item != None:
-            addItemToDB(cursorDb,item)
+            addItemToDB(db,item)
         db.commit()
-    cursorDb.close()
+
     
 
 ##generateWebSite()
