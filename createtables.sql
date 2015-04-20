@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Serveur: localhost
--- Généré le : Lun 20 Avril 2015 à 15:51
+-- Généré le : Lun 20 Avril 2015 à 16:40
 -- Version du serveur: 5.0.75
 -- Version de PHP: 5.2.6-3ubuntu4.6
 
@@ -122,6 +122,24 @@ CREATE TABLE IF NOT EXISTS `ITEMCLASS` (
 -- Contenu de la table `ITEMCLASS`
 --
 
+INSERT INTO `ITEMCLASS` (`id`, `name`) VALUES
+(0, 'Consumable'),
+(1, 'Container'),
+(2, 'Weapon'),
+(3, 'Gem'),
+(4, 'Armor'),
+(5, 'Reagent'),
+(6, 'Projectile'),
+(7, 'Trade Goods'),
+(8, 'Generic'),
+(9, 'Book'),
+(10, 'Money'),
+(11, 'Quiver'),
+(12, 'Quest'),
+(13, 'Key'),
+(14, 'Permanent'),
+(15, 'Junk'),
+(16, 'Glyph');
 
 -- --------------------------------------------------------
 
@@ -214,13 +232,138 @@ CREATE TABLE IF NOT EXISTS `ITEMSUBCLASS` (
   `idSubClass` tinyint(3) unsigned NOT NULL,
   `name` varchar(30) default NULL,
   `completeName` varchar(30) default NULL,
-  PRIMARY KEY  (`idClass`,`idSubClass`)
+  PRIMARY KEY  (`idClass`,`idSubClass`),
+  KEY `idSubClass` (`idSubClass`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Contenu de la table `ITEMSUBCLASS`
 --
 
+INSERT INTO `ITEMSUBCLASS` (`idClass`, `idSubClass`, `name`, `completeName`) VALUES
+(0, 0, 'Consumable', 'NULL'),
+(0, 1, 'Potion', 'NULL'),
+(0, 2, 'Elixir', 'NULL'),
+(0, 3, 'Flask', 'NULL'),
+(0, 4, 'Scroll', 'NULL'),
+(0, 5, 'Food & Drink', 'NULL'),
+(0, 6, 'Item Enhancement', 'NULL'),
+(0, 7, 'Bandage', 'NULL'),
+(0, 8, 'Other', 'NULL'),
+(1, 0, 'Bag', 'NULL'),
+(1, 1, 'Soul Bag', 'NULL'),
+(1, 2, 'Herb Bag', 'NULL'),
+(1, 3, 'Enchanting Bag', 'NULL'),
+(1, 4, 'Engineering Bag', 'NULL'),
+(1, 5, 'Gem Bag', 'NULL'),
+(1, 6, 'Mining Bag', 'NULL'),
+(1, 7, 'Leatherworking Bag', 'NULL'),
+(1, 8, 'Inscription Bag', 'NULL'),
+(1, 9, 'Tackle Box', 'NULL'),
+(2, 0, 'Axe', 'One-Handed Axes'),
+(2, 1, 'Axe', 'Two-Handed Axes'),
+(2, 2, 'Bow', 'Bows'),
+(2, 3, 'Gun', 'Guns'),
+(2, 4, 'Mace', 'One-Handed Maces'),
+(2, 5, 'Mace', 'Two-Handed Maces'),
+(2, 6, 'Polearm', 'Polearms'),
+(2, 7, 'Sword', 'One-Handed Swords'),
+(2, 8, 'Sword', 'Two-Handed Swords'),
+(2, 9, 'Obsolete', 'NULL'),
+(2, 10, 'Staff', 'Staves'),
+(2, 11, 'Exotic', 'One-Handed Exotics'),
+(2, 12, 'Exotic', 'Two-Handed Exotics'),
+(2, 13, 'Fist Weapon', 'Fist Weapons'),
+(2, 14, 'Miscellaneous', 'NULL'),
+(2, 15, 'Dagger', 'Daggers'),
+(2, 16, 'Thrown', 'Thrown'),
+(2, 17, 'Spear', 'Spears'),
+(2, 18, 'Crossbow', 'Crossbows'),
+(2, 19, 'Wand', 'Wands'),
+(2, 20, 'Fishing Pole', 'Fishing Poles'),
+(3, 0, 'Red', 'NULL'),
+(3, 1, 'Blue', 'NULL'),
+(3, 2, 'Yellow', 'NULL'),
+(3, 3, 'Purple', 'NULL'),
+(3, 4, 'Green', 'NULL'),
+(3, 5, 'Orange', 'NULL'),
+(3, 6, 'Meta', 'NULL'),
+(3, 7, 'Simple', 'NULL'),
+(3, 8, 'Prismatic', 'NULL'),
+(3, 9, 'Hydraulic', 'NULL'),
+(3, 10, 'Cogwheel', 'NULL'),
+(4, 0, 'Miscellaneous', 'NULL'),
+(4, 1, 'Cloth', 'Cloth'),
+(4, 2, 'Leather', 'Leather'),
+(4, 3, 'Mail', 'Mail'),
+(4, 4, 'Plate', 'Plate'),
+(4, 5, 'Buckler(OBSOLETE)', 'Bucklers'),
+(4, 6, 'Shield', 'Shields'),
+(4, 7, 'Libram', 'Librams'),
+(4, 8, 'Idol', 'Idols'),
+(4, 9, 'Totem', 'Totems'),
+(4, 10, 'Sigil', 'Sigils'),
+(4, 11, 'Relic', 'NULL'),
+(5, 0, 'Reagent', 'NULL'),
+(6, 0, 'Wand(OBSOLETE)', 'NULL'),
+(6, 1, 'Bolt(OBSOLETE)', 'NULL'),
+(6, 2, 'Arrow', 'NULL'),
+(6, 3, 'Bullet', 'NULL'),
+(6, 4, 'Thrown(OBSOLETE)', 'NULL'),
+(7, 0, 'Trade Goods', 'NULL'),
+(7, 1, 'Parts', 'NULL'),
+(7, 2, 'Explosives', 'NULL'),
+(7, 3, 'Devices', 'NULL'),
+(7, 4, 'Jewelcrafting', 'NULL'),
+(7, 5, 'Cloth', 'NULL'),
+(7, 6, 'Leather', 'NULL'),
+(7, 7, 'Metal & Stone', 'NULL'),
+(7, 8, 'Meat', 'NULL'),
+(7, 9, 'Herb', 'NULL'),
+(7, 10, 'Elemental', 'NULL'),
+(7, 11, 'Other', 'NULL'),
+(7, 12, 'Enchanting', 'NULL'),
+(7, 13, 'Materials', 'NULL'),
+(7, 14, 'Item Enchantment', 'Item Enchantment'),
+(7, 15, 'Weapon Enchantment - Obsolete', 'Weapon Enchantment - Obsolete'),
+(8, 0, 'Generic(OBSOLETE)', 'NULL'),
+(9, 0, 'Book', 'NULL'),
+(9, 1, 'Leatherworking', 'NULL'),
+(9, 2, 'Tailoring', 'NULL'),
+(9, 3, 'Engineering', 'NULL'),
+(9, 4, 'Blacksmithing', 'NULL'),
+(9, 5, 'Cooking', 'NULL'),
+(9, 6, 'Alchemy', 'NULL'),
+(9, 7, 'First Aid', 'NULL'),
+(9, 8, 'Enchanting', 'NULL'),
+(9, 9, 'Fishing', 'NULL'),
+(9, 10, 'Jewelcrafting', 'NULL'),
+(9, 11, 'Inscription', 'Inscription'),
+(10, 0, 'Money(OBSOLETE)', 'NULL'),
+(11, 0, 'Quiver(OBSOLETE)', 'NULL'),
+(11, 1, 'Quiver(OBSOLETE)', 'NULL'),
+(11, 2, 'Quiver', 'NULL'),
+(11, 3, 'Ammo Pouch', 'NULL'),
+(12, 0, 'Quest', 'NULL'),
+(13, 0, 'Key', 'NULL'),
+(13, 1, 'Lockpick', 'NULL'),
+(14, 0, 'Permanent', 'NULL'),
+(15, 0, 'Junk', 'NULL'),
+(15, 1, 'Reagent', 'NULL'),
+(15, 2, 'Pet', 'NULL'),
+(15, 3, 'Holiday', 'NULL'),
+(15, 4, 'Other', 'NULL'),
+(15, 5, 'Mount', 'Mount'),
+(16, 1, 'Warrior', 'Warrior'),
+(16, 2, 'Paladin', 'Paladin'),
+(16, 3, 'Hunter', 'Hunter'),
+(16, 4, 'Rogue', 'Rogue'),
+(16, 5, 'Priest', 'Priest'),
+(16, 6, 'Death Knight', 'Death Knight'),
+(16, 7, 'Shaman', 'Shaman'),
+(16, 8, 'Mage', 'Mage'),
+(16, 9, 'Warlock', 'Warlock'),
+(16, 11, 'Druid', 'Druid');
 
 -- --------------------------------------------------------
 
@@ -473,11 +616,17 @@ ALTER TABLE `FRIENDS`
   ADD CONSTRAINT `FRIENDS_ibfk_1` FOREIGN KEY (`idFriend`) REFERENCES `PLAYERS` (`id`);
 
 --
+-- Contraintes pour la table `ITEMCLASS`
+--
+ALTER TABLE `ITEMCLASS`
+  ADD CONSTRAINT `ITEMCLASS_ibfk_1` FOREIGN KEY (`id`) REFERENCES `ITEMSUBCLASS` (`idClass`);
+
+--
 -- Contraintes pour la table `ITEMS`
 --
 ALTER TABLE `ITEMS`
+  ADD CONSTRAINT `ITEMS_ibfk_5` FOREIGN KEY (`subclassid`) REFERENCES `ITEMSUBCLASS` (`idSubClass`),
   ADD CONSTRAINT `ITEMS_ibfk_1` FOREIGN KEY (`classid`) REFERENCES `ITEMCLASS` (`id`),
-  ADD CONSTRAINT `ITEMS_ibfk_2` FOREIGN KEY (`subclassid`) REFERENCES `ITEMSUBCLASS` (`idClass`),
   ADD CONSTRAINT `ITEMS_ibfk_3` FOREIGN KEY (`picture`) REFERENCES `ITEMSPICTURES` (`id`),
   ADD CONSTRAINT `ITEMS_ibfk_4` FOREIGN KEY (`description`) REFERENCES `ITEMSDESCRIPTIONS` (`id`);
 
