@@ -21,8 +21,9 @@ def bonusStats(filename="bonusStats.txt"):
         splited1=line.split(":")
         idStat=splited1[0]
         name=splited1[1].split(",")[0]
-        print idStat,name
-        print "INSERT INTO BONUSSTATS VALUES({id},\"{description}\")".format(id=idStat,description=name)
+        if DEBUG:
+            print idStat,name
+            print "INSERT INTO BONUSSTATS VALUES({id},\"{description}\")".format(id=idStat,description=name)
         cur.execute("INSERT INTO BONUSSTATS VALUES({id},{description})".format(id=idStat,description=name))
         line=fichier.readline()
     cur.close()
@@ -59,7 +60,8 @@ def createTables():
     
     
 
-
+def saveData(data,filename):
+    filename.write(data)
 def getDataFromUrl(url,local="fr"):
     global LOCALS
     global DEBUG
@@ -86,21 +88,25 @@ def getLeader3V3(ranking,moreInfo=True):
 
 def addItemDescription(curseurDb,item):
     try:
-        print "SELECT id FROM ITEMSDESCRIPTIONS WHERE description=\""+item["description"].encode("utf-8")+"\""
+        if DEBUG:
+            print "SELECT id FROM ITEMSDESCRIPTIONS WHERE description=\""+item["description"].encode("utf-8")+"\""
         curseurDb.execute("SELECT id FROM ITEMSDESCRIPTIONS WHERE description=\""+item["description"].encode("utf-8")+"\"")
     
         row =curseurDb.fetchone() 
-        print row
+        if DEBUG:
+            print row
         if row != None:
             keyDescription=row[0]
-            print keyDescription
+            if DEBUG:
+                print keyDescription
         else:
             curseurDb.execute("SELECT MAX(id) FROM ITEMSDESCRIPTIONS ")
             row =curseurDb.fetchone()
             if row[0] == None:
                 maxIdItemsPicture=1
             else:
-                print row
+                if DEBUG:
+                    print row
                 maxIdItemsPicture=int(row[0])+1
             keyDescription=maxIdItemsPicture
             curseurDb.execute("INSERT INTO ITEMSDESCRIPTIONS VALUES(NULL,\""+item["description"].encode("utf-8")+"\")")
@@ -114,21 +120,25 @@ def addItemDescription(curseurDb,item):
 
 def addItemPicture(curseurDb,item):
     try:
-        print "SELECT id FROM ITEMSPICTURES WHERE name=\""+item["icon"].encode("utf-8")+"\""
+        if DEBUG:
+            print "SELECT id FROM ITEMSPICTURES WHERE name=\""+item["icon"].encode("utf-8")+"\""
         curseurDb.execute("SELECT id FROM ITEMSPICTURES WHERE name=\""+item["icon"].encode("utf-8")+"\"")
     
         row =curseurDb.fetchone() 
-        print row
+        if DEBUG:
+            print row
         if row != None:
             keyPicture=row[0]
-            print keyPicture
+            if DEBUG:
+                print keyPicture
         else:
             curseurDb.execute("SELECT MAX(id) FROM ITEMSPICTURES ")
             row =curseurDb.fetchone()
             if row[0] == None:
                 maxIdItemsPicture=1
             else:
-                print row
+                if DEBUG:
+                    print row
                 maxIdItemsPicture=int(row[0])+1
             keyPicture=maxIdItemsPicture
             curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES(NULL,\""+item["icon"].encode("utf-8")+"\")")
@@ -273,7 +283,25 @@ def addItemToDB(database,item):
     
 
 def getItem(i):
-    return getDataFromUrl(WOW_API_URL+"item/"+str(i))
+    try:
+        testfile=open("items/item."+str(i)+".json","r")
+        if DEBUG:
+            print "items/item."+str(i)+".json"
+        if testfile.readline == "404":
+            return None
+        else:
+            testfile.seek(0)
+            return json.load(testfile)
+    except:
+        data= getDataFromUrl(WOW_API_URL+"item/"+str(i))
+        savefile=open("items/item."+str(i)+".json","w")
+        if data != None:
+            json.dump(data,savefile)
+            
+        else:
+            savefile.write("404")
+        savefile.close()
+        return data
         
 
 
@@ -291,6 +319,8 @@ def testAddItem(start,end):
         item=getItem(i)
         if item != None:
             addItemToDB(db,item)
+        if float(i-start)*float(1000)/float(end-start) %10 == 0:
+            print str(float(i-start)*float(100)/float(end-start)) +" %"
         db.commit()
 
     

@@ -5,4 +5,4 @@ WOW_API_URL="http://eu.battle.net/api/wow/"
 WOW_MEDIUM_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/56/"
 WOW_SMALL_IMG_API_URL="http://eu.media.blizzard.com/wow/icons/36/"
 LOCALS={"en":"?locale=en_GB","fr":"?locale=fr_FR","None":""}
-DEBUG=True
+DEBUG=False
