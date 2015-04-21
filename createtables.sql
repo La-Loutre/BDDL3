@@ -211,7 +211,7 @@ CREATE TABLE IF NOT EXISTS `ITEMSPICTURES` (
 CREATE TABLE IF NOT EXISTS `ITEMSTAT` (
   `id` mediumint(8) unsigned NOT NULL,
   `stat` tinyint(3) unsigned NOT NULL,
-  `amount` tinyint(3) unsigned NOT NULL,
+  `amount` mediumint(8) unsigned NOT NULL,
   PRIMARY KEY  (`id`,`stat`,`amount`),
   KEY `stat` (`stat`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -383,9 +383,9 @@ CREATE TABLE IF NOT EXISTS `LANGUES` (
 
 INSERT INTO `LANGUES` (`id`, `langue`) VALUES
 (1, 'Allemand'),
-(2, 'Anglais'),
+(2, 'en_GB'),
 (3, 'Espagnol'),
-(4, 'Français'),
+(4, 'fr_FR'),
 (5, 'Italien'),
 (6, 'Russe');
 
@@ -398,8 +398,9 @@ INSERT INTO `LANGUES` (`id`, `langue`) VALUES
 CREATE TABLE IF NOT EXISTS `PLAYERS` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `name` varchar(50) NOT NULL default '',
-  `server` tinyint(3) unsigned NOT NULL,
+  `serverId` tinyint(3) unsigned NOT NULL,
   `genderId` tinyint(3) unsigned default NULL,
+  `factionId` tinyint(3) unsigned default NULL,
   `raceId` tinyint(3) unsigned default NULL,
   `level` tinyint(3) unsigned default NULL,
   `thumbnail` varchar(100) default NULL,
@@ -431,7 +432,7 @@ CREATE TABLE IF NOT EXISTS `PLAYERS` (
   KEY `feetId` (`feetId`),
   KEY `chestId_3` (`chestId`),
   KEY `legsId` (`legsId`),
-  KEY `server` (`server`),
+  KEY `serverId` (`serverId`),
   KEY `raceId` (`raceId`),
   KEY `genderId` (`genderId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
@@ -548,10 +549,10 @@ CREATE TABLE IF NOT EXISTS `SERVEURTYPE` (
 --
 
 INSERT INTO `SERVEURTYPE` (`id`, `type`) VALUES
-(0, 'Normal'),
-(1, 'JcJ'),
-(2, 'JdR'),
-(3, 'JcJ et JdR');
+(0, 'pve'),
+(1, 'pvp'),
+(2, 'rp'),
+(3, 'rppvp');
 
 -- --------------------------------------------------------
 
@@ -642,7 +643,7 @@ ALTER TABLE `PLAYERS`
   ADD CONSTRAINT `PLAYERS_ibfk_11` FOREIGN KEY (`trinket2Id`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_12` FOREIGN KEY (`waistId`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_13` FOREIGN KEY (`wristId`) REFERENCES `ITEMS` (`id`),
-  ADD CONSTRAINT `PLAYERS_ibfk_14` FOREIGN KEY (`server`) REFERENCES `SERVEURS` (`id`),
+  ADD CONSTRAINT `PLAYERS_ibfk_14` FOREIGN KEY (`serverId`) REFERENCES `SERVEURS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_17` FOREIGN KEY (`raceId`) REFERENCES `RACES` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_18` FOREIGN KEY (`genderId`) REFERENCES `CLASSES` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_2` FOREIGN KEY (`feetId`) REFERENCES `ITEMS` (`id`),

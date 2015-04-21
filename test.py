@@ -130,6 +130,7 @@ def addItemDescription(database,item):
                 maxIdItemsPicture=int(row[0])+1
             keyDescription=maxIdItemsPicture
             curseurDb.execute("INSERT INTO ITEMSDESCRIPTIONS VALUES(NULL,\""+item["description"].encode("utf-8")+"\")")
+            database.commit()
     except:
         print traceback.format_exc()
         return None
@@ -162,7 +163,11 @@ def addItemPicture(database,item):
                     print row
                 maxIdItemsPicture=int(row[0])+1
             keyPicture=maxIdItemsPicture
+            if DEBUG :
+                print "INSERT INTO ITEMSPICTURES VALUES(NULL,\""+item["icon"].encode("utf-8")+"\")"
             curseurDb.execute("INSERT INTO ITEMSPICTURES VALUES(NULL,\""+item["icon"].encode("utf-8")+"\")")
+            database.commit()
+           
     except:
         print traceback.format_exc()
         return None
@@ -193,9 +198,9 @@ def addPlayerToDB(database,infoPlayer,playerName,serverName):
     itemsProfile=getPlayerProfile(serverName,playerName,"?fields=items")
     try:
         addItemsPlayer(database,itemsProfile["items"])
-        curseurDb.execute("""INSERT INTO PLAYERS VALUES(
+        curseurDb.execute("""INSERT INTO PLAYERS VALUES(NULL,
                           \"{playerNamee}\",
-                          \"{serverNamee}\",
+                          {serverId},
                           {genderId},
                           {factionId},
                           {raceId},
@@ -214,8 +219,8 @@ def addPlayerToDB(database,infoPlayer,playerName,serverName):
                           {trinket1Id},
                           {trinket2Id},
                           {waistId},
-                          {wristId})""".format(playerNamee=playerName,
-                                               serverNamee=serverName,
+                          {wristId})""".format(playerNamee=playerName.encode("utf-8"),
+                                               serverId=str(addServerToDB(database,getServer(serverName))),
                                                genderId=str(infoPlayer["genderId"]),
                                                factionId=str(infoPlayer["factionId"]),
                                                raceId=str(infoPlayer["raceId"]),
@@ -235,6 +240,7 @@ def addPlayerToDB(database,infoPlayer,playerName,serverName):
                                                trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),
                                                waistId=str(itemsProfile["items"]["waist"]["id"]),
                                                wristId=str(itemsProfile["items"]["wrist"]["id"])))
+        database.commit()
       
         return True
     except :
@@ -258,6 +264,7 @@ def addItemWeapon(database,item):
                                      dmgMin=weaponInfo["damage"]["min"],
                                      dps=int(weaponInfo["dps"]),
                                      weaponspeed=weaponInfo["weaponSpeed"]))
+        database.commit()
     except:
         print traceback.format_exc()
 def addItemToDB(database,item):
@@ -265,7 +272,8 @@ def addItemToDB(database,item):
     keyPicture=addItemPicture(database,item)
     if keyPicture == None:
         return None
-
+    if DEBUG :
+        print "KEYPICTURE : "+str(keyPicture)
     
     keyDescription=addItemDescription(database,item)
     if keyDescription == None:
@@ -274,6 +282,7 @@ def addItemToDB(database,item):
     
 
     try:        
+
         curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")")
         
         cursorDb2=MySQLdb.cursors.DictCursor(database)
@@ -297,6 +306,7 @@ def addItemToDB(database,item):
                               """.format(id=item["id"],
                                          statid=stat["stat"],
                                          amount=stat["amount"]))
+        database.commit()
         cursorDb2.close()
 
         
@@ -306,7 +316,61 @@ def addItemToDB(database,item):
         
         print traceback.format_exc()
     
+def getIdLangueFromDB(database,langue):
+    curseurDb=MySQLdb.cursors.DictCursor(database)
+    curseurDb.execute("SELECT * FROM LANGUES WHERE langue=\"{langueName}\"".format(langueName=langue))
+    row = curseurDb.fetchone()
+    curseurDb.close()
+    return row["id"]
 
+def getIdServerTypeFromDB(database,serverType):
+    curseurDb=MySQLdb.cursors.DictCursor(database)
+    if DEBUG :
+        print "SELECT * FROM SERVEURTYPE WHERE type=\"{servertype}\"".format(servertype=serverType)
+    curseurDb.execute("SELECT * FROM SERVEURTYPE WHERE type=\"{servertype}\"".format(servertype=serverType))
+
+    row = curseurDb.fetchone()
+    print row
+    curseurDb.close()
+    return row["id"]
+
+def addServerToDB(database,server):
+    curseurDb=MySQLdb.cursors.DictCursor(database)
+    
+    try:
+
+        curseurDb.execute("SELECT * FROM SERVEURS WHERE name=\"{serverName}\"".format(serverName=server["name"].encode("utf-8")))
+        row =curseurDb.fetchone() 
+        if DEBUG:
+            print row
+        if row != None:
+            keyId=row["id"]
+            if DEBUG:
+                print keyId
+        else:
+            curseurDb.execute("SELECT MAX(id) FROM SERVEURS ")
+            row =curseurDb.fetchone()
+            if row["MAX(id)"] == None:
+                maxIdItemsPicture=1
+            else:
+                if DEBUG:
+                    print row
+                maxIdItemsPicture=int(row[0])+1
+            keyId=maxIdItemsPicture
+            curseurDb.execute("""INSERT INTO SERVEURS VALUES(NULL,
+                                                                     \"{serverName}\",
+                                                                     {idLangue},
+                                                                     {idType})
+                                                                      """.format(serverName=server["name"].encode("utf-8"),
+                                                                                 idLangue=getIdLangueFromDB(database,server["locale"]),
+                                                                                 idType=getIdServerTypeFromDB(database,server["type"])
+                                                                                 ))
+            database.commit()
+    except:
+        print traceback.format_exc()
+        return None
+    return keyId
+    
 def getServer(serverName):
     if not os.path.exists("servers"):
         os.makedirs("servers")
