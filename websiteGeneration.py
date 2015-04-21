@@ -10,7 +10,7 @@ COLORS={"gris":"color:#B3B3B3",
         "violet":"color:BC00FF",
         "orange":"color:FF9E00",
         "beige":"color:FACD86"}
-FRONT_PAGE_NAME="index.html"
+FRONT_PAGE_NAME="website/index.html"
 PLAYERS_PAGE_NAME="players.html"
 ITEMS_PAGE_NAME="items.html"
 def generateFrontPage():
@@ -28,7 +28,7 @@ def generateFrontPage():
 def generatePlayersPage():
     global db
     cursorDb=MySQLdb.cursors.DictCursor(db)
-    newHtml=open(PLAYERS_PAGE_NAME,"w")
+    newHtml=open("website/"+PLAYERS_PAGE_NAME,"w")
     newHtml.write("""<table style=\"background:#000000\"> 
                            <tr> 
                                <th style=\"color:#FFFFFF\"> 
@@ -61,7 +61,7 @@ def generatePlayersPage():
         print traceback.format_exc()
 def generatePlayerPage(row,filename):
 
-    newHtml=open(filename+".html","w")
+    newHtml=open("website/"+filename+".html","w")
     cursor=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
     items=row
@@ -111,12 +111,13 @@ def generateItemForTab(itemId):
     
 def generateItemPage(row,imgName,fileName):
 
-    newHtml=open(fileName+".html","w")
+    newHtml=open("website/"+fileName+".html","w")
 
     cursor=MySQLdb.cursors.DictCursor(db)
     cursor.execute("SELECT description FROM ITEMSDESCRIPTIONS WHERE id={idDesc}".format(idDesc=str(row["description"])))
     descriptionValue=cursor.fetchone()["description"]
-    print str(row["classid"]) , str(row["subclassid"])
+    if DEBUG:
+        print str(row["classid"]) , str(row["subclassid"])
     typeValue,subTypeValue=getTypes(str(row["classid"]),str(row["subclassid"]))
     
     newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
@@ -145,7 +146,7 @@ def generateItemsPage():
             "color:FACD86"]
     cursorDb=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
-    fichierHtml=open(ITEMS_PAGE_NAME,"w")
+    fichierHtml=open("website/"+ITEMS_PAGE_NAME,"w")
     fichierHtml.write("<table style=\"background:#000000\"> "+
                       "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
                       "<th style=\"color:#FFFFFF\"> Image</th></tr>")
@@ -158,7 +159,10 @@ def generateItemsPage():
             nomLien=row["name"].decode(encoding="ascii",errors="ignore")
             nomLien=nomLien.replace(" ","")
             nomLien=nomLien.replace(":","")
-            print nomLien
+            nomLien=nomLien.replace("/","")
+          
+            if DEBUG:
+                print nomLien
             imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
             fichierHtml.write("<tr><td><a style=\"{colorQuality}\" href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=row["name"],nomlien=nomLien,img=imgLink,colorQuality=colors[row["quality"]]))
             generateItemPage(row,imgLink,nomLien)

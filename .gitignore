@@ -5,3 +5,6 @@ passwd.py
 *#
 *.html
 items/
+website/
+servers/
+players/

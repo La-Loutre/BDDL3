@@ -2,10 +2,11 @@ import json
 import MySQLdb,MySQLdb.cursors
 from passwd import *
 import urllib2
+from httplib2 import iri2uri
 import traceback
 from loadfile import *
 from globals import *
-
+import os
 
 
 
@@ -28,6 +29,8 @@ def bonusStats(filename="bonusStats.txt"):
         line=fichier.readline()
     cur.close()
     database.commit()
+    
+
 def createTables():
     global db
     cur = db.cursor()
@@ -65,6 +68,7 @@ def saveData(data,filename):
 def getDataFromUrl(url,local="fr"):
     global LOCALS
     global DEBUG
+    url = iri2uri(url)
     try:
         if DEBUG:
             print url+LOCALS[local]
@@ -81,12 +85,28 @@ def getPlayerProfile(serverName,playerName,field=""):
     return getDataFromUrl(WOW_API_URL+"character/"+serverName+"/"+playerName+field,"None")
 def getLeader3V3(ranking,moreInfo=True):
     assert(ranking>=1)
-    # No trycatch 
-    info = getDataFromUrl(WOW_API_URL+"leaderboard/3v3")["rows"][ranking-1]
+    if not os.path.exists("players"):
+        os.makedirs("players")
+    try:
+        testfile=open("players/leaderboard3V3.json","r")
+        info=json.load(testfile)
+        info=info["rows"][ranking-1]
+        testfile.close()
+    except:
+        if DEBUG :
+            print traceback.format_exc()
+        raw = getDataFromUrl(WOW_API_URL+"leaderboard/3v3")
+        info=raw["rows"][ranking-1]
+        testfile=open("players/leaderboard3V3.json","w")
+        json.dump(raw,testfile)
+        testfile.close()
     if moreInfo:
         return info,info["name"],info["realmName"]
+    else:
+        return info
 
-def addItemDescription(curseurDb,item):
+def addItemDescription(database,item):
+    curseurDb=database.cursor()
     try:
         if DEBUG:
             print "SELECT id FROM ITEMSDESCRIPTIONS WHERE description=\""+item["description"].encode("utf-8")+"\""
@@ -118,7 +138,8 @@ def addItemDescription(curseurDb,item):
 
 
 
-def addItemPicture(curseurDb,item):
+def addItemPicture(database,item):
+    curseurDb=database.cursor()
     try:
         if DEBUG:
             print "SELECT id FROM ITEMSPICTURES WHERE name=\""+item["icon"].encode("utf-8")+"\""
@@ -147,7 +168,8 @@ def addItemPicture(curseurDb,item):
         return None
     return keyPicture
 
-def addItemsPlayer(curseurDb,items):
+def addItemsPlayer(database,items):
+    curseurDb=database.cursor()
     itemsToBeAdded=[items["back"],
                     items["feet"],
                     items["finger1"],
@@ -164,11 +186,13 @@ def addItemsPlayer(curseurDb,items):
                     items["wrist"]]
     for i in range(len(itemsToBeAdded)):
         item=getItem(itemsToBeAdded[i]["id"])
-        addItemToDB(curseurDb,item)
+        addItemToDB(database,item)
     
-def addPlayerToDB(curseurDb,infoPlayer,playerName,serverName):
+def addPlayerToDB(database,infoPlayer,playerName,serverName):
+    curseurDb=database.cursor()
     itemsProfile=getPlayerProfile(serverName,playerName,"?fields=items")
     try:
+        addItemsPlayer(database,itemsProfile["items"])
         curseurDb.execute("""INSERT INTO PLAYERS VALUES(
                           \"{playerNamee}\",
                           \"{serverNamee}\",
@@ -211,15 +235,16 @@ def addPlayerToDB(curseurDb,infoPlayer,playerName,serverName):
                                                trinket2Id=str(itemsProfile["items"]["trinket2"]["id"]),
                                                waistId=str(itemsProfile["items"]["waist"]["id"]),
                                                wristId=str(itemsProfile["items"]["wrist"]["id"])))
-        addItemsPlayer(curseurDb,itemsProfile["items"])
+      
         return True
     except :
         print traceback.format_exc()
-        print itemsProfile
+      ##  print itemsProfile
         return None
     
     
-def addItemWeapon(curseurDb,item):
+def addItemWeapon(database,item):
+    curseurDb=database.cursor()
     weaponInfo=item["weaponInfo"]
     try:
         curseurDb.execute("""INSERT INTO WEAPON VALUES(
@@ -237,12 +262,12 @@ def addItemWeapon(curseurDb,item):
         print traceback.format_exc()
 def addItemToDB(database,item):
     curseurDb=database.cursor()
-    keyPicture=addItemPicture(curseurDb,item)
+    keyPicture=addItemPicture(database,item)
     if keyPicture == None:
         return None
 
     
-    keyDescription=addItemDescription(curseurDb,item)
+    keyDescription=addItemDescription(database,item)
     if keyDescription == None:
         return None
     
@@ -255,7 +280,7 @@ def addItemToDB(database,item):
         cursorDb2.execute("SELECT * FROM ITEMCLASS WHERE id={idItem}".format(idItem=str(item["itemClass"]))) 
         row = cursorDb2.fetchone()
         if row["name"] == "Weapon":
-            addItemWeapon(curseurDb,item)
+            addItemWeapon(database,item)
 
 
             
@@ -282,12 +307,39 @@ def addItemToDB(database,item):
         print traceback.format_exc()
     
 
+def getServer(serverName):
+    if not os.path.exists("servers"):
+        os.makedirs("servers")
+    try:
+        testfile=open("servers/servers.json","r")
+        raw=json.load(testfile)
+        testfile.close()
+        
+    except:
+        raw=getDataFromUrl(WOW_API_URL+"realm/status")
+        if raw != None:
+            testfile=open("servers/servers.json","w")
+            json.dump(raw,testfile)
+            testfile.close()
+        else:
+            return None
+
+    server=raw["realms"]
+    for i in range(len(server)):
+        if server[i]["name"] == serverName:
+            return server[i]
+
+    return None
+
 def getItem(i):
+    if not os.path.exists("items"):
+        os.makedirs("items")
     try:
         testfile=open("items/item."+str(i)+".json","r")
         if DEBUG:
             print "items/item."+str(i)+".json"
         if testfile.readline == "404":
+            testfile.close()
             return None
         else:
             testfile.seek(0)
@@ -308,10 +360,9 @@ def getItem(i):
 
 def testAddPlayer(ranking):
     info,name,server=getLeader3V3(ranking)
-    cur=db.cursor()
-    if(addPlayerToDB(cur,info,name,server)!=None):
+    if(addPlayerToDB(db,info,name,server)!=None):
         db.commit()
-    cur.close()
+
 
 def testAddItem(start,end):
 
