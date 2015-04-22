@@ -267,6 +267,16 @@ def addItemWeapon(database,item):
         database.commit()
     except:
         print traceback.format_exc()
+
+def getStatFromId(database,stat):
+    curseurDb=database.cursor()
+    curseurDb.execute("SELECT * FROM BONUSSTATS WHERE id={id}".format(id=stat))
+    row=curseurDb.fetchone()
+    if row == None:
+        return None
+    else :
+        return row[0]
+
 def addItemToDB(database,item):
     curseurDb=database.cursor()
     keyPicture=addItemPicture(database,item)
@@ -299,14 +309,17 @@ def addItemToDB(database,item):
         if len(bonusStats) > 0 :
             for i in range(len(bonusStats)):
                 stat=bonusStats[i]
-                cursorDb2.execute("""INSERT INTO ITEMSTAT VALUES(
+                if  getStatFromId(database,stat["stat"]) != None :
+                    if DEBUG:
+                        print "ADDITEMSTAT"
+                    cursorDb2.execute("""INSERT INTO ITEMSTAT VALUES(
                                  {id},
                                  {statid},
                                  {amount})
                               """.format(id=item["id"],
                                          statid=stat["stat"],
                                          amount=stat["amount"]))
-        database.commit()
+                    database.commit()
         cursorDb2.close()
 
         

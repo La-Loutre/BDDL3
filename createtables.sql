@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS `ITEMS` (
 
 CREATE TABLE IF NOT EXISTS `ITEMSDESCRIPTIONS` (
   `id` mediumint(8) unsigned NOT NULL auto_increment,
-  `description` varchar(100) NOT NULL default '',
+  `description` varchar(200) NOT NULL default '',
   PRIMARY KEY  (`id`,`description`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
