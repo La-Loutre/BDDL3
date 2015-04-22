@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 import json
 import MySQLdb,MySQLdb.cursors
 from passwd import *
@@ -169,6 +171,7 @@ def addItemPicture(database,item):
             database.commit()
            
     except:
+        print item
         print traceback.format_exc()
         return None
     return keyPicture
@@ -196,6 +199,16 @@ def addItemsPlayer(database,items):
 def addPlayerToDB(database,infoPlayer,playerName,serverName):
     curseurDb=database.cursor()
     itemsProfile=getPlayerProfile(serverName,playerName,"?fields=items")
+    if itemsProfile==None:
+        return None
+    print playerName
+    curseurDb2=MySQLdb.cursors.DictCursor(database)
+    curseurDb2.execute("""SELECT * FROM PLAYERS WHERE name=\"{name}\"""".format(name=playerName.encode("utf-8")))
+    row = curseurDb2.fetchone()
+    
+    serverIdd=addServerToDB(database,getServer(serverName))
+    if row != None and row["serverId"] == serverIdd :
+        return None
     try:
         addItemsPlayer(database,itemsProfile["items"])
         curseurDb.execute("""INSERT INTO PLAYERS VALUES(NULL,
@@ -221,7 +234,7 @@ def addPlayerToDB(database,infoPlayer,playerName,serverName):
                           {trinket2Id},
                           {waistId},
                           {wristId})""".format(playerNamee=playerName.encode("utf-8"),
-                                               serverId=str(addServerToDB(database,getServer(serverName))),
+                                               serverId=str(serverIdd),
                                                genderId=str(infoPlayer["genderId"]),
                                                factionId=str(infoPlayer["factionId"]),
                                                raceId=str(infoPlayer["raceId"]),
@@ -270,6 +283,7 @@ def addItemWeapon(database,item):
         database.commit()
     except:
         print traceback.format_exc()
+
 
 def getStatFromId(database,stat):
     curseurDb=database.cursor()

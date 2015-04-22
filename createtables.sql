@@ -84,9 +84,9 @@ CREATE TABLE IF NOT EXISTS `FACTION` (
 --
 
 INSERT INTO `FACTION` (`id`, `name`) VALUES
-(0, 'neutral'),
-(1, 'alliance'),
-(2, 'horde');
+(2, 'neutral'),
+(0, 'alliance'),
+(1, 'horde');
 
 -- --------------------------------------------------------
 
@@ -420,7 +420,7 @@ CREATE TABLE IF NOT EXISTS `PLAYERS` (
   `trinket2Id` mediumint(8) unsigned default NULL,
   `waistId` mediumint(8) unsigned default NULL,
   `wristId` mediumint(8) unsigned default NULL,
-  PRIMARY KEY  (`id`),
+  PRIMARY KEY  (`id`,`name`,`serverId`),
   KEY `wristId` (`wristId`),
   KEY `waistId` (`waistId`),
   KEY `trinket2Id` (`trinket2Id`),

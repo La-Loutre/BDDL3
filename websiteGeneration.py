@@ -1,7 +1,11 @@
+# -*- coding:utf-8 -*-
+
 import traceback
 import json
 import MySQLdb,MySQLdb.cursors
+from httplib2 import iri2uri
 from globals import *
+
 
 COLORS={"gris":"color:#B3B3B3", 
         "blanc":"color:#FFFFFF",
@@ -28,8 +32,9 @@ def generateFrontPage():
 def generatePlayersPage():
     global db
     cursorDb=MySQLdb.cursors.DictCursor(db)
+    cursorDb2=MySQLdb.cursors.DictCursor(db)
     newHtml=open("website/"+PLAYERS_PAGE_NAME,"w")
-    newHtml.write("""<table style=\"background:#000000\"> 
+    newHtml.write("""<table border=\"1\" style=\"background:#000000\"> 
                            <tr> 
                                <th style=\"color:#FFFFFF\"> 
                                      Nom
@@ -37,10 +42,44 @@ def generatePlayersPage():
                                <th style=\"color:#FFFFFF\"> 
                                     Image
                                </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Serveur
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Race
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Faction
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Classe
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Niveau
+                               </th>
+
+                           
                            </tr>""")    
     try:
         cursorDb.execute("SELECT * FROM PLAYERS")
         for row in cursorDb:
+            ##Fetch serverName
+            cursorDb2.execute("SELECT name FROM SERVEURS WHERE id={id}".format(id=row["serverId"]))
+            serverName=(cursorDb2.fetchone())["name"]
+
+            ##Fetch race name
+            cursorDb2.execute("SELECT name FROM RACES WHERE id={id}".format(id=row["raceId"]))
+            raceName=(cursorDb2.fetchone())["name"]
+
+            ##Fetch Faction name
+            cursorDb2.execute("SELECT name FROM FACTION WHERE id={id}".format(id=row["factionId"]))
+            factionName=(cursorDb2.fetchone())["name"]
+
+            ##Fetch class name
+            cursorDb2.execute("SELECT name FROM CLASSES WHERE id={id}".format(id=row["classId"]))
+            className=(cursorDb2.fetchone())["name"]
+
+
             nomHtml=row["name"].decode(encoding="ascii",errors="ignore")
             nomHtml=nomHtml.replace(" ","")
             nomHtml=nomHtml.replace(":","")
@@ -48,10 +87,37 @@ def generatePlayersPage():
                                   <td>
                                     <a href=\"{url}\" style=\"{color}\" >{playerName} </a>
                                   </td>
+                                  <td>
+                                    <img src=\"{playerIconUrl}\" />
+                                  </td>
+                                  <td>
+                                    <p style=\"{color}\" >{servername}   </p>
+                                   </td>   
+                                   <td>
+                                    <p style=\"{color}\" >{racename}   </p>
+                                   </td>     
+                                   <td>
+                                    <p style=\"{color}\" >{factionname}   </p>
+                                   </td>     
+                                   <td>
+                                    <p style=\"{color}\" >{classname}   </p>
+                                   </td>     
+                                   <td>
+                                    <p style=\"{color}\" >{level}   </p>
+                                   </td>     
+                                                                      
+                                  
                               </tr>
                           """.format(url=nomHtml+".html",
                                      color=COLORS["blanc"],
-                                     playerName=row["name"]))
+                                     playerName=row["name"],
+                                     playerIconUrl=WOW_PLAYER_MEDIUM_IMG_API_URL+row["thumbnail"],
+                                     servername=serverName,
+                                     racename=raceName,
+                                     factionname=factionName,
+                                     classname=className,
+                                     level=str(row["level"])
+                                     ))
             
             generatePlayerPage(row,nomHtml)
         
@@ -79,7 +145,7 @@ def generatePlayerPage(row,filename):
                items["trinket2Id"],
                items["waistId"],
                items["wristId"]]
-    newHtml.write("<table style=\"background:#000000\"> "+
+    newHtml.write("<table border=\"1\" style=\"background:#000000\"> "+
                       "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
                       "<th style=\"color:#FFFFFF\"> Image</th></tr>")    
     for i in range(len(itemsList)):
@@ -147,7 +213,8 @@ def generateItemsPage():
     cursorDb=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
     fichierHtml=open("website/"+ITEMS_PAGE_NAME,"w")
-    fichierHtml.write("<table style=\"background:#000000\"> "+
+    fichierHtml.write("""<head><meta charset="utf-8"/></head>""")
+    fichierHtml.write("<table border=\"1\" style=\"background:#000000\"> "+
                       "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
                       "<th style=\"color:#FFFFFF\"> Image</th></tr>")
     try:
@@ -156,11 +223,12 @@ def generateItemsPage():
            
             cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(row["picture"]))
             row2=cursorDb2.fetchone()
-            nomLien=row["name"].decode(encoding="ascii",errors="ignore")
+            print type(unicode(row["name"],"latin-1"))
+            nomLien=iri2uri(row["name"])
             nomLien=nomLien.replace(" ","")
             nomLien=nomLien.replace(":","")
             nomLien=nomLien.replace("/","")
-          
+            
             if DEBUG:
                 print nomLien
             imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
