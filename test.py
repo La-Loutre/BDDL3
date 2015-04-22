@@ -204,6 +204,7 @@ def addPlayerToDB(database,infoPlayer,playerName,serverName):
                           {genderId},
                           {factionId},
                           {raceId},
+                          {classId},
                           {level},
                           \"{thumbnail}\",
                           {backId},
@@ -224,6 +225,7 @@ def addPlayerToDB(database,infoPlayer,playerName,serverName):
                                                genderId=str(infoPlayer["genderId"]),
                                                factionId=str(infoPlayer["factionId"]),
                                                raceId=str(infoPlayer["raceId"]),
+                                               classId=str(infoPlayer["classId"]),
                                                level=str(itemsProfile["level"]),
                                                thumbnail=itemsProfile["thumbnail"],
                                                backId=str(itemsProfile["items"]["back"]["id"]),
@@ -244,6 +246,7 @@ def addPlayerToDB(database,infoPlayer,playerName,serverName):
       
         return True
     except :
+        print "GENDER "+str(infoPlayer["genderId"])
         print traceback.format_exc()
       ##  print itemsProfile
         return None
@@ -279,6 +282,12 @@ def getStatFromId(database,stat):
 
 def addItemToDB(database,item):
     curseurDb=database.cursor()
+    cursorDb2=MySQLdb.cursors.DictCursor(database)
+    
+    cursorDb2.execute("SELECT * FROM ITEMS WHERE id={id}".format(id=item["id"]))
+    row = cursorDb2.fetchone()
+    if row != None:
+        return None
     keyPicture=addItemPicture(database,item)
     if keyPicture == None:
         return None
@@ -290,7 +299,7 @@ def addItemToDB(database,item):
         return None
     
     
-
+   
     try:        
 
         curseurDb.execute("INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")")
@@ -301,9 +310,11 @@ def addItemToDB(database,item):
         if row["name"] == "Weapon":
             addItemWeapon(database,item)
 
-
+        database.commit()
+    except:
+        print traceback.format_exc()
             
-            
+    try:
         bonusStats=item["bonusStats"]
         nbStat=len(bonusStats)
         if len(bonusStats) > 0 :
@@ -325,8 +336,6 @@ def addItemToDB(database,item):
         
 
     except:
-        print "INSERT INTO ITEMS VALUES("+str(item["id"])+","+str(item["itemClass"])+","+str(item["itemSubClass"])+",\""+item["name"].encode("utf-8")+"\","+str(keyDescription)+","+str(item["itemLevel"])+","+str(keyPicture)+","+str(item["quality"])+")"
-        
         print traceback.format_exc()
     
 def getIdLangueFromDB(database,langue):
@@ -363,12 +372,13 @@ def addServerToDB(database,server):
         else:
             curseurDb.execute("SELECT MAX(id) FROM SERVEURS ")
             row =curseurDb.fetchone()
+            print row
             if row["MAX(id)"] == None:
                 maxIdItemsPicture=1
             else:
                 if DEBUG:
                     print row
-                maxIdItemsPicture=int(row[0])+1
+                maxIdItemsPicture=int(row["MAX(id)"])+1
             keyId=maxIdItemsPicture
             curseurDb.execute("""INSERT INTO SERVEURS VALUES(NULL,
                                                                      \"{serverName}\",
@@ -435,10 +445,11 @@ def getItem(i):
 
 
 
-def testAddPlayer(ranking):
-    info,name,server=getLeader3V3(ranking)
-    if(addPlayerToDB(db,info,name,server)!=None):
-        db.commit()
+def testAddPlayer(rankingstart,rankingend):
+    for ranking in range(rankingstart,rankingend):
+        info,name,server=getLeader3V3(ranking)
+        if(addPlayerToDB(db,info,name,server)!=None):
+            db.commit()
 
 
 def testAddItem(start,end):

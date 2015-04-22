@@ -382,12 +382,13 @@ CREATE TABLE IF NOT EXISTS `LANGUES` (
 --
 
 INSERT INTO `LANGUES` (`id`, `langue`) VALUES
-(1, 'Allemand'),
+(1, 'de_DE'),
 (2, 'en_GB'),
-(3, 'Espagnol'),
+(3, 'es_ES'),
 (4, 'fr_FR'),
-(5, 'Italien'),
-(6, 'Russe');
+(5, 'it_IT'),
+(6, 'ru_RU'),
+(7, 'pt_PT');
 
 -- --------------------------------------------------------
 
@@ -402,6 +403,7 @@ CREATE TABLE IF NOT EXISTS `PLAYERS` (
   `genderId` tinyint(3) unsigned default NULL,
   `factionId` tinyint(3) unsigned default NULL,
   `raceId` tinyint(3) unsigned default NULL,
+  `classId` tinyint(3) unsigned default NULL,
   `level` tinyint(3) unsigned default NULL,
   `thumbnail` varchar(100) default NULL,
   `backId` mediumint(9) default NULL,
@@ -645,7 +647,7 @@ ALTER TABLE `PLAYERS`
   ADD CONSTRAINT `PLAYERS_ibfk_13` FOREIGN KEY (`wristId`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_14` FOREIGN KEY (`serverId`) REFERENCES `SERVEURS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_17` FOREIGN KEY (`raceId`) REFERENCES `RACES` (`id`),
-  ADD CONSTRAINT `PLAYERS_ibfk_18` FOREIGN KEY (`genderId`) REFERENCES `CLASSES` (`id`),
+  ADD CONSTRAINT `PLAYERS_ibfk_18` FOREIGN KEY (`classId`) REFERENCES `CLASSES` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_2` FOREIGN KEY (`feetId`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_3` FOREIGN KEY (`finger1Id`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_4` FOREIGN KEY (`finger2Id`) REFERENCES `ITEMS` (`id`),
