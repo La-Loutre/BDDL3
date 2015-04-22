@@ -402,7 +402,7 @@ def getItem(i):
         testfile=open("items/item."+str(i)+".json","r")
         if DEBUG:
             print "items/item."+str(i)+".json"
-        if testfile.readline == "404":
+        if testfile.readline() == "404":
             testfile.close()
             return None
         else:
