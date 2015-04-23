@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Serveur: localhost
--- Généré le : Jeu 23 Avril 2015 à 13:41
+-- Généré le : Jeu 23 Avril 2015 à 14:53
 -- Version du serveur: 5.0.75
 -- Version de PHP: 5.2.6-3ubuntu4.6
 
@@ -145,24 +145,6 @@ INSERT INTO `FACTION` (`id`, `name`) VALUES
 (0, 'alliance'),
 (1, 'horde'),
 (2, 'neutral');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `FRIENDS`
---
-
-CREATE TABLE IF NOT EXISTS `FRIENDS` (
-  `idPlayer` int(10) unsigned NOT NULL,
-  `idFriend` int(10) unsigned NOT NULL,
-  PRIMARY KEY  (`idPlayer`,`idFriend`),
-  KEY `idFriend` (`idFriend`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Contenu de la table `FRIENDS`
---
-
 
 -- --------------------------------------------------------
 
@@ -464,7 +446,7 @@ CREATE TABLE IF NOT EXISTS `PLAYERS` (
   `classId` tinyint(3) unsigned default NULL,
   `level` tinyint(3) unsigned default NULL,
   `thumbnail` varchar(100) default NULL,
-  `backId` mediumint(9) default NULL,
+  `backId` mediumint(8) unsigned default NULL,
   `chestId` mediumint(8) unsigned default NULL,
   `feetId` mediumint(8) unsigned default NULL,
   `finger1Id` mediumint(8) unsigned default NULL,
@@ -479,6 +461,7 @@ CREATE TABLE IF NOT EXISTS `PLAYERS` (
   `waistId` mediumint(8) unsigned default NULL,
   `wristId` mediumint(8) unsigned default NULL,
   PRIMARY KEY  (`id`,`name`,`serverId`),
+  UNIQUE KEY `name` (`name`,`serverId`),
   KEY `wristId` (`wristId`),
   KEY `waistId` (`waistId`),
   KEY `trinket2Id` (`trinket2Id`),
@@ -495,7 +478,8 @@ CREATE TABLE IF NOT EXISTS `PLAYERS` (
   KEY `serverId` (`serverId`),
   KEY `raceId` (`raceId`),
   KEY `genderId` (`genderId`),
-  KEY `PLAYERS_ibfk_18` (`classId`)
+  KEY `PLAYERS_ibfk_18` (`classId`),
+  KEY `backId` (`backId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
@@ -669,13 +653,6 @@ ALTER TABLE `CLASSES`
   ADD CONSTRAINT `CLASSES_ibfk_1` FOREIGN KEY (`powerType`) REFERENCES `POWERTYPE` (`id`);
 
 --
--- Contraintes pour la table `FRIENDS`
---
-ALTER TABLE `FRIENDS`
-  ADD CONSTRAINT `FRIENDS_ibfk_2` FOREIGN KEY (`idPlayer`) REFERENCES `PLAYERS` (`id`),
-  ADD CONSTRAINT `FRIENDS_ibfk_1` FOREIGN KEY (`idFriend`) REFERENCES `PLAYERS` (`id`);
-
---
 -- Contraintes pour la table `ITEMS`
 --
 ALTER TABLE `ITEMS`
@@ -695,6 +672,7 @@ ALTER TABLE `ITEMSTAT`
 -- Contraintes pour la table `PLAYERS`
 --
 ALTER TABLE `PLAYERS`
+  ADD CONSTRAINT `PLAYERS_ibfk_19` FOREIGN KEY (`backId`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_1` FOREIGN KEY (`chestId`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_10` FOREIGN KEY (`trinket1Id`) REFERENCES `ITEMS` (`id`),
   ADD CONSTRAINT `PLAYERS_ibfk_11` FOREIGN KEY (`trinket2Id`) REFERENCES `ITEMS` (`id`),
