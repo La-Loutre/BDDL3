@@ -193,7 +193,7 @@ def addItemsPlayer(database,items):
                     items["waist"],
                     items["wrist"]]
     for i in range(len(itemsToBeAdded)):
-        item=getItem(itemsToBeAdded[i]["id"])
+        item=getItem(itemsToBeAdded[i]["id"],itemsToBeAdded[i]["context"])
         addItemToDB(database,item)
     
 def addPlayerToDB(database,infoPlayer,playerName,serverName):
@@ -432,7 +432,7 @@ def getServer(serverName):
 
     return None
 
-def getItem(i):
+def getItem(i,context=""):
     if not os.path.exists("items"):
         os.makedirs("items")
     try:
@@ -446,7 +446,12 @@ def getItem(i):
             testfile.seek(0)
             return json.load(testfile)
     except:
+
+        
         data= getDataFromUrl(WOW_API_URL+"item/"+str(i))
+        if data !=None and "name" not in data and context != "":
+            data=getDataFromUrl(WOW_API_URL+"item/"+str(i)+"/"+context)
+    
         savefile=open("items/item."+str(i)+".json","w")
         if data != None:
             json.dump(data,savefile)
@@ -464,6 +469,8 @@ def testAddPlayer(rankingstart,rankingend):
         info,name,server=getLeader3V3(ranking)
         if(addPlayerToDB(db,info,name,server)!=None):
             db.commit()
+        if float(ranking-rankingstart)*float(1000)/float(rankingend-rankingstart) %10 == 0:
+            print str(float(ranking-rankingstart)*float(100)/float(rankingend-rankingstart)) +" %"
 
 
 def testAddItem(start,end):

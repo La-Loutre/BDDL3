@@ -13,7 +13,8 @@ COLORS={"gris":"color:#B3B3B3",
         "bleu":"color:0D00FF",
         "violet":"color:BC00FF",
         "orange":"color:FF9E00",
-        "beige":"color:FACD86"}
+        "beige":"color:FACD86"
+}
 FRONT_PAGE_NAME="website/index.html"
 PLAYERS_PAGE_NAME="players.html"
 ITEMS_PAGE_NAME="items.html"
@@ -124,7 +125,10 @@ def generatePlayersPage():
         newHtml.write("</table>")
         return PLAYERS_PAGE_NAME
     except:
+        
         print traceback.format_exc()
+        thread.sleep(10)
+        
 def generatePlayerPage(row,filename):
 
     newHtml=open("website/"+filename+".html","w")
@@ -160,11 +164,18 @@ def generateItemForTab(itemId):
             "color:0D00FF",
             "color:BC00FF",
             "color:FF9E00",
-            "color:FACD86"]
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86"
+            
+            ]
     cursor=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
     cursor.execute("SELECT * FROM ITEMS WHERE id={id}".format(id=str(itemId)))
     itemFound=cursor.fetchone()
+    if itemFound == None:
+        print str(itemId)
     cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(itemFound["picture"]))
     row2=cursorDb2.fetchone()
     nomLien=itemFound["name"].decode(encoding="ascii",errors="ignore")
@@ -209,7 +220,13 @@ def generateItemsPage():
             "color:0D00FF",
             "color:BC00FF",
             "color:FF9E00",
-            "color:FACD86"]
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86",
+
+            ]
     cursorDb=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
     fichierHtml=open("website/"+ITEMS_PAGE_NAME,"w")
@@ -223,7 +240,7 @@ def generateItemsPage():
            
             cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(row["picture"]))
             row2=cursorDb2.fetchone()
-            print type(unicode(row["name"],"latin-1"))
+            print row["name"]
             nomLien=iri2uri(row["name"])
             nomLien=nomLien.replace(" ","")
             nomLien=nomLien.replace(":","")
@@ -240,4 +257,5 @@ def generateItemsPage():
 
 
     fichierHtml.close()
+    print ITEMS_PAGE_NAME
     return ITEMS_PAGE_NAME
