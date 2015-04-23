@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Serveur: localhost
--- Généré le : Lun 20 Avril 2015 à 16:40
+-- Généré le : Jeu 23 Avril 2015 à 13:41
 -- Version du serveur: 5.0.75
 -- Version de PHP: 5.2.6-3ubuntu4.6
 
@@ -35,6 +35,64 @@ CREATE TABLE IF NOT EXISTS `BONUSSTATS` (
 -- Contenu de la table `BONUSSTATS`
 --
 
+INSERT INTO `BONUSSTATS` (`id`, `description`) VALUES
+(0, '?????????'),
+(1, 'Health'),
+(2, 'Mana'),
+(3, 'Agility'),
+(4, 'Strength'),
+(5, 'Intellect'),
+(6, 'Spirit'),
+(7, 'Stamina'),
+(8, '?????????'),
+(9, '?????????'),
+(10, '?????????'),
+(11, '?????????'),
+(12, 'Defense'),
+(13, 'Dodge'),
+(14, 'Parry'),
+(15, 'Block rating'),
+(16, 'Melee hit'),
+(17, 'Ranged hit'),
+(18, 'Spell hit'),
+(19, 'Melee crit'),
+(20, 'Range Crit'),
+(21, 'Spell crit'),
+(22, 'Melee avoid'),
+(23, 'Ranged avoid'),
+(24, 'Spell avoid'),
+(25, 'M crit avoid'),
+(26, 'R crit avoid'),
+(27, 'S crit avoid'),
+(28, 'Melee haste'),
+(29, 'Ranged haste'),
+(30, 'Spell haste'),
+(31, 'Hit'),
+(32, 'Crit'),
+(33, 'Hit avoid'),
+(34, 'Crit avoid'),
+(35, 'Resil'),
+(36, 'Haste'),
+(37, 'Expertise'),
+(38, 'Attack Power'),
+(39, 'Ranged AP'),
+(40, 'Feral AP'),
+(41, 'Increase dmg'),
+(42, 'Increase heal'),
+(43, 'Mp5'),
+(44, 'ArP'),
+(45, 'Spell Power'),
+(46, 'Health Regen'),
+(47, 'Spell pen'),
+(48, 'Block Value'),
+(49, 'Mastery'),
+(50, 'Armor'),
+(51, 'Fire Resist'),
+(52, 'Frost Resist'),
+(54, 'Shadow Resist'),
+(55, 'Nature Resist'),
+(56, 'Arcane Resist'),
+(57, 'Pvp Power');
 
 -- --------------------------------------------------------
 
@@ -84,9 +142,9 @@ CREATE TABLE IF NOT EXISTS `FACTION` (
 --
 
 INSERT INTO `FACTION` (`id`, `name`) VALUES
-(2, 'neutral'),
 (0, 'alliance'),
-(1, 'horde');
+(1, 'horde'),
+(2, 'neutral');
 
 -- --------------------------------------------------------
 
@@ -436,7 +494,8 @@ CREATE TABLE IF NOT EXISTS `PLAYERS` (
   KEY `legsId` (`legsId`),
   KEY `serverId` (`serverId`),
   KEY `raceId` (`raceId`),
-  KEY `genderId` (`genderId`)
+  KEY `genderId` (`genderId`),
+  KEY `PLAYERS_ibfk_18` (`classId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
@@ -615,10 +674,6 @@ ALTER TABLE `CLASSES`
 ALTER TABLE `FRIENDS`
   ADD CONSTRAINT `FRIENDS_ibfk_2` FOREIGN KEY (`idPlayer`) REFERENCES `PLAYERS` (`id`),
   ADD CONSTRAINT `FRIENDS_ibfk_1` FOREIGN KEY (`idFriend`) REFERENCES `PLAYERS` (`id`);
-
---
--- Contraintes pour la table `ITEMCLASS`
---
 
 --
 -- Contraintes pour la table `ITEMS`
