@@ -4,6 +4,7 @@ import json
 import MySQLdb,MySQLdb.cursors
 from passwd import *
 import urllib2
+import urllib
 from httplib2 import iri2uri
 import traceback
 from loadfile import *
@@ -70,16 +71,17 @@ def saveData(data,filename):
 def getDataFromUrl(url,local="fr"):
     global LOCALS
     global DEBUG
-    url = iri2uri(url)
+    url = iri2uri(url+LOCALS[local])
     try:
         if DEBUG:
-            print url+LOCALS[local]
-        jsonFile=urllib2.urlopen(url+LOCALS[local])
+            print url
+        jsonFile=urllib.urlopen(url)
         data=json.load(jsonFile)
         return data
     except :
         if DEBUG:
             print traceback.format_exc()
+            print url
         return None
 
 
@@ -449,7 +451,7 @@ def getItem(i,context=""):
 
         
         data= getDataFromUrl(WOW_API_URL+"item/"+str(i))
-        if data !=None and "name" not in data and context != "":
+        if data !=None and "name" not in data and context != "" and context !="vendor":
             data=getDataFromUrl(WOW_API_URL+"item/"+str(i)+"/"+context)
     
         savefile=open("items/item."+str(i)+".json","w")
