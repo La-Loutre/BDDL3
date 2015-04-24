@@ -82,7 +82,7 @@ def generatePlayersPage():
             className=(cursorDb2.fetchone())["name"]
 
 
-            nomHtml=row["name"].decode(encoding="ascii",errors="ignore")
+            nomHtml=iri2uri(row["name"])
             nomHtml=nomHtml.replace(" ","")
             nomHtml=nomHtml.replace(":","")
             newHtml.write(""" <tr> 
