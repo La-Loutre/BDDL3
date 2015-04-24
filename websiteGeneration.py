@@ -14,7 +14,8 @@ COLORS={"gris":"color:#B3B3B3",
         "bleu":"color:0D00FF",
         "violet":"color:BC00FF",
         "orange":"color:FF9E00",
-        "beige":"color:FACD86"
+        "beige":"color:FACD86",
+        "rouge":"color:#FF0000"
 }
 FRONT_PAGE_NAME="website/index.html"
 PLAYERS_PAGE_NAME="players.html"
@@ -190,7 +191,19 @@ def generateItemForTab(itemId):
     return "<tr><td><a style=\"{colorQuality}\" href={nomlien}.html>{nom}</a></td><td><img src={img} ></td><tr>".format(nom=itemFound["name"],nomlien=nomLien,img=imgLink,colorQuality=colors[itemFound["quality"]])
     
 def generateItemPage(row,imgName,fileName):
+    colors=["color:#B3B3B3",
+            "color:#FFFFFF",
+            "color:00FF26",
+            "color:0D00FF",
+            "color:BC00FF",
+            "color:FF9E00",
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86",
+            "color:FACD86",
 
+            ]
     newHtml=open("website/"+fileName+".html","w")
     color=COLORS["blanc"]
     cursor=MySQLdb.cursors.DictCursor(db)
@@ -226,7 +239,7 @@ def generateItemPage(row,imgName,fileName):
     newHtml.write( """ 
                                 <tr>
                                  <td>
-                                    <p style=\"{color}\">{itemName} </p>
+                                    <p style=\"{colorQuality}\">{itemName} </p>
                                   </td>
                                   <td>
                                     <img src=\"{imgnom}\" />
@@ -244,13 +257,56 @@ def generateItemPage(row,imgName,fileName):
                                     <p style=\"{color}\" >{subtype}   </p>
                                    </td>     
                                                                     
-                              </tr>""".format(itemName=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue,color=color))
+                              </tr>""".format(itemName=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue,color=color,colorQuality=colors[row["quality"]]))
     newHtml.write("""</table>""")
+    if typeValue=="Weapon":
+        generateWeaponStat(newHtml,row["id"])
 
     generateBonusStat(newHtml,row["id"])
+
     newHtml.close()
     cursor.close()
 
+
+def generateWeaponStat(fichier,itemId):
+    cursor=MySQLdb.cursors.DictCursor(db)
+    cursor.execute("SELECT * FROM WEAPON WHERE id={id}".format(id=str(itemId)))
+    weaponInfo=cursor.fetchone()
+    fichier.write("""<table border=\"1\" style=\"background:#000000\"> 
+                          <tr> 
+                               <th style=\"color:#FFFFFF\"> 
+                                     Damage Max
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Damage Min
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    DPS
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Vitesse d'attaque
+                               </th><tr>""")
+    fichier.write( """<tr>
+                                 <td>
+                                    <p style=\"{colorGreen}\">{dmgMax} </p>
+                                  </td>
+                                  <td>
+                                    <p style=\"{colorRed}\" >{dmgMin}   </p>
+                                   </td>   
+                                   <td>
+                                    <p style=\"{colorGreen}\" >{dps}   </p>
+                                   </td>     
+                                   <td>
+                                    <p style=\"{colorBlue}\" >{weaponSpeed}   </p>
+                                   </td>     
+                                                                    
+                              </tr></table>""".format(colorGreen=COLORS["vert"],
+                                              colorBlue=COLORS["bleu"],
+                                              colorRed=COLORS["rouge"],
+                                              dmgMax=weaponInfo["damageMax"],
+                                              dmgMin=weaponInfo["damageMin"],
+                                              dps=weaponInfo["dps"],
+                                              weaponSpeed=weaponInfo["weaponSpeed"]))
 def generateBonusStat(fichier,itemId):
     cursor=MySQLdb.cursors.DictCursor(db)
     cursor2=MySQLdb.cursors.DictCursor(db)
