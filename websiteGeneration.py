@@ -9,6 +9,7 @@ from globals import *
 
 COLORS={"gris":"color:#B3B3B3", 
         "blanc":"color:#FFFFFF",
+        "noir":"color:000000",
         "vert":"color:00FF26", 
         "bleu":"color:0D00FF",
         "violet":"color:BC00FF",
@@ -201,9 +202,6 @@ def generateItemPage(row,imgName,fileName):
         print str(row["classid"]) , str(row["subclassid"])
     typeValue,subTypeValue=getTypes(str(row["classid"]),str(row["subclassid"]))
     newHtml.write("""<head><meta charset="utf-8"/></head>""")
-    #newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
-    #"<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
-#                       "<th style=\"color:#FFFFFF\"> Image</th></tr>") 
     newHtml.write("""<table border=\"1\" style=\"background:#000000\"> 
                           <tr> 
                                <th style=\"color:#FFFFFF\"> 
@@ -248,9 +246,28 @@ def generateItemPage(row,imgName,fileName):
                                                                     
                               </tr>""".format(itemName=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue,color=color))
     newHtml.write("""</table>""")
+
+    generateBonusStat(newHtml,row["id"])
     newHtml.close()
     cursor.close()
 
+def generateBonusStat(fichier,itemId):
+    cursor=MySQLdb.cursors.DictCursor(db)
+    cursor2=MySQLdb.cursors.DictCursor(db)
+    cursor.execute("SELECT * FROM ITEMSTAT WHERE id={id}".format(id=str(itemId)))
+    row = cursor.fetchall()
+    for i in range(0,len(row)):
+        bonusStat=row[i]
+        cursor2.execute("SELECT * FROM BONUSSTATS WHERE id={idStat}".format(idStat=str(bonusStat["stat"])))
+        rowStatName=cursor2.fetchone()
+        statName=rowStatName["description"]
+        fichier.write("""<p style=\"{black}\">
+                          <span style=\"{green}\">+{valueStat}</span>
+                          {statName}
+                         </p>""".format(black=COLORS["noir"],
+                                        green=COLORS["vert"],
+                                        valueStat=bonusStat["amount"],
+                                        statName=statName))
 def getTypes(typeid,subtypeid):
     cursor=MySQLdb.cursors.DictCursor(db)
     cursor.execute("SELECT name FROM ITEMCLASS WHERE id={id}".format(id=typeid))
