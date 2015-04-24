@@ -35,6 +35,7 @@ def generatePlayersPage():
     cursorDb=MySQLdb.cursors.DictCursor(db)
     cursorDb2=MySQLdb.cursors.DictCursor(db)
     newHtml=open("website/"+PLAYERS_PAGE_NAME,"w")
+    newHtml.write("""<head><meta charset="utf-8"/></head>""")
     newHtml.write("""<table border=\"1\" style=\"background:#000000\"> 
                            <tr> 
                                <th style=\"color:#FFFFFF\"> 
