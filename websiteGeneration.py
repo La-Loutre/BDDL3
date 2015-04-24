@@ -21,6 +21,8 @@ FRONT_PAGE_NAME="website/index.html"
 PLAYERS_PAGE_NAME="players.html"
 ITEMS_PAGE_NAME="items.html"
 def generateFrontPage():
+    if not os.path.exists("website"):
+        os.makedirs("website")
     newHtml=open(FRONT_PAGE_NAME,"w")
     playersPage=generatePlayersPage()
     itemsPage=generateItemsPage()
