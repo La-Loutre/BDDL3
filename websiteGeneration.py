@@ -2,6 +2,7 @@
 
 import traceback
 import json
+import os 
 import MySQLdb,MySQLdb.cursors
 from httplib2 import iri2uri
 from globals import *
