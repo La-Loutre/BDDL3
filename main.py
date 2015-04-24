@@ -451,10 +451,14 @@ def getItem(i,context=""):
 
         
         data= getDataFromUrl(WOW_API_URL+"item/"+str(i))
-        if data !=None and "name" not in data and context != "" and context !="vendor":
+        savefile=open("items/item."+str(i)+".json","w")
+        if "id" not in data:
+            savefile.write("404")
+            return None
+        if data !=None and "name" not in data and context != "" and context !="vendor" :
             data=getDataFromUrl(WOW_API_URL+"item/"+str(i)+"/"+context)
     
-        savefile=open("items/item."+str(i)+".json","w")
+        
         if data != None:
             json.dump(data,savefile)
             
