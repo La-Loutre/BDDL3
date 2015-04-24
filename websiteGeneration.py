@@ -191,15 +191,63 @@ def generateItemForTab(itemId):
 def generateItemPage(row,imgName,fileName):
 
     newHtml=open("website/"+fileName+".html","w")
-
+    color=COLORS["blanc"]
     cursor=MySQLdb.cursors.DictCursor(db)
     cursor.execute("SELECT description FROM ITEMSDESCRIPTIONS WHERE id={idDesc}".format(idDesc=str(row["description"])))
     descriptionValue=cursor.fetchone()["description"]
+    if descriptionValue == "":
+        descriptionValue="Pas de description"
     if DEBUG:
         print str(row["classid"]) , str(row["subclassid"])
     typeValue,subTypeValue=getTypes(str(row["classid"]),str(row["subclassid"]))
     newHtml.write("""<head><meta charset="utf-8"/></head>""")
-    newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
+    #newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
+    #"<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
+#                       "<th style=\"color:#FFFFFF\"> Image</th></tr>") 
+    newHtml.write("""<table border=\"1\" style=\"background:#000000\"> 
+                          <tr> 
+                               <th style=\"color:#FFFFFF\"> 
+                                     Nom
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Image
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Niveau
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Description
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Type
+                               </th>
+                               <th style=\"color:#FFFFFF\"> 
+                                    Sous-type
+                               </th><tr>""")
+
+    newHtml.write( """ 
+                                <tr>
+                                 <td>
+                                    <p style=\"{color}\">{itemName} </p>
+                                  </td>
+                                  <td>
+                                    <img src=\"{imgnom}\" />
+                                  </td>
+                                  <td>
+                                    <p style=\"{color}\" >{niveau}   </p>
+                                   </td>   
+                                   <td>
+                                    <p style=\"{color}\" >{description}   </p>
+                                   </td>     
+                                   <td>
+                                    <p style=\"{color}\" >{typee}   </p>
+                                   </td>     
+                                   <td>
+                                    <p style=\"{color}\" >{subtype}   </p>
+                                   </td>     
+                                                                    
+                              </tr>""".format(itemName=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue,color=color))
+    newHtml.write("""</table>""")
     newHtml.close()
     cursor.close()
 
