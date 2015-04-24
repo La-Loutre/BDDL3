@@ -149,6 +149,7 @@ def generatePlayerPage(row,filename):
                items["trinket2Id"],
                items["waistId"],
                items["wristId"]]
+    newHtml.write("""<head><meta charset="utf-8"/></head>""")
     newHtml.write("<table border=\"1\" style=\"background:#000000\"> "+
                       "<tr> <th style=\"color:#FFFFFF\">Nom</th>\n"+
                       "<th style=\"color:#FFFFFF\"> Image</th></tr>")    
@@ -178,7 +179,7 @@ def generateItemForTab(itemId):
         print str(itemId)
     cursorDb2.execute("SELECT * FROM ITEMSPICTURES WHERE id="+str(itemFound["picture"]))
     row2=cursorDb2.fetchone()
-    nomLien=itemFound["name"].decode(encoding="ascii",errors="ignore")
+    nomLien=iri2uri(itemFound["name"])
     nomLien=nomLien.replace(" ","")
     nomLien=nomLien.replace(":","")
     imgLink=WOW_MEDIUM_IMG_API_URL+row2["name"]+".jpg"
@@ -196,7 +197,7 @@ def generateItemPage(row,imgName,fileName):
     if DEBUG:
         print str(row["classid"]) , str(row["subclassid"])
     typeValue,subTypeValue=getTypes(str(row["classid"]),str(row["subclassid"]))
-    
+    newHtml.write("""<head><meta charset="utf-8"/></head>""")
     newHtml.write("<p>Nom : {nom} </p><p>Niveau : {niveau}</p><p>Description : {description}</p> <p>Type : {typee}</p><p>Sous-type : {subtype}</p><img src= {imgnom} > <p>".format(nom=row["name"],niveau=row["level"],description=descriptionValue,imgnom=imgName,typee=typeValue,subtype=subTypeValue))
     newHtml.close()
     cursor.close()
